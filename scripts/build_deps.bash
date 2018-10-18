@@ -14,6 +14,6 @@ echo ">[BUILD]<START>< Building OpenCV"
 echo ">[BUILD]<DONE>< Building OpenCV"
 
 echo ">[BUILD]<START>< Downloading third party libraries"
-./scripts/download_thirdparty.bash
+./scripts/download_3rdparty.bash
 echo ">[BUILD]<DONE>< Downloading third party libraries"
 

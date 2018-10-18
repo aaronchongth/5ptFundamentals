@@ -1,3 +1,5 @@
 data/*
 3rd_party/*
 deps/*
+bin/*
+build_files/*

@@ -12,6 +12,8 @@
 
 - cmake 3.5.1 +
 
+- C++ 14
+
 
 ## Setup
 
@@ -32,13 +34,14 @@
   time to grab a coffee or do something else more productive than staring at a loading screen.
 
 
-## Compile (under construction)
+## Compile
 
 Build project, run
   ```
   ./build
   ```
 Which runs 'cmake' and 'make' for all the code in 'src/'. Target location will be in 'bin/'.
+
 
 ## Cleaning (under construction)
 
@@ -68,10 +71,17 @@ After this, `build_deps` will have to be re-run again before `build` to compile
 the project.
 
 
+## OpenCV Libraries
 
+Currenly only builds
 
+- features2d
+- xfeatures2d
+- highgui
+- imgcodecs
+- imgprocs
+- calib3d
 
-
-
-
-
+For other extra libraries, edit `scripts/build_opencv.bash` 
+under the flag `BUILD_LIST`. Remember to exclude spaces when adding extra 
+libraries, otherwise they will be whitelisted by `cmake`.

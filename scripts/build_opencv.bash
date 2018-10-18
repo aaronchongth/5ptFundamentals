@@ -57,28 +57,11 @@ cmake \
     -DBUILD_SHARED_LIBS=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DBUILD_PNG=ON \
-    -DBUILD_TIFF=OFF \
-    -DBUILD_TBB=OFF \
-    -DBUILD_JPEG=ON \
-    -DBUILD_JASPER=OFF \
-    -DBUILD_ZLIB=OFF \
-    -DBUILD_EXAMPLES=OFF \
-    -DBUILD_opencv_java=OFF \
-    -DENABLE_NEON=OFF \
-    -DWITH_OPENCL=OFF \
-    -DWITH_OPENMP=OFF \
-    -DWITH_GSTREAMER=OFF \
-    -DWITH_GSTREAMER_0_10=OFF \
     -DWITH_CUDA=OFF \
-    -DWITH_GTK=OFF \
-    -DWITH_VTK=OFF \
-    -DWITH_1394=OFF \
-    -DWITH_OPENEXR=OFF \
     -DINSTALL_C_EXAMPLES=OFF \
     -DINSTALL_TESTS=OFF \
     -DOPENCV_EXTRA_MODULES_PATH=$OPENCV_CONTRIB_DIR/modules \
-    -DBUILD_LIST=xfeatures2d \
+    -DBUILD_LIST=features2d,xfeatures2d,highgui,imgcodecs,imgprocs,calib3d,videoio,video \
     ..
 
 echo ">[BUILD]<DONE>< Running OpenCV cmake"
