@@ -7,6 +7,8 @@ function print_project_root {
   readlink -f `dirname $(readlink -f "$0")`/..
 }
 
+cd `print_project_root`
+
 DOWNLOAD_SCRIPT_GLOB="scripts/3rd_party/*.bash"
 
 echo ">[BUILD]<START>< Downloading third party using scripts: $DOWNLOAD_SCRIPT_GLOB"

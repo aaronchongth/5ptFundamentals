@@ -7,6 +7,8 @@ function print_project_root {
   readlink -f `dirname $(readlink -f "$0")`/..
 }
 
+cd `print_project_root`
+
 echo ">[BUILD]<START>< Building OpenCV"
 ./scripts/build_opencv.bash
 echo ">[BUILD]<DONE>< Building OpenCV"
