@@ -6,7 +6,7 @@ set (CMAKE_CXX_STANDARD 14)
 #-------------------------------------------------------------------------------
 # Project setup
 #-------------------------------------------------------------------------------
-project(wayve_drivers C CXX)
+project(5pt_fundamentals C CXX)
 set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/bin")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
@@ -15,6 +15,16 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 #-------------------------------------------------------------------------------
 set(OpenCV_BUILD_DIR "${CMAKE_SOURCE_DIR}/deps/opencv/build")
 find_package(OpenCV 3.4.0 REQUIRED HINTS ${OpenCV_BUILD_DIR})
+
+#-------------------------------------------------------------------------------
+# Eigen
+#-------------------------------------------------------------------------------
+set(eigen_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rd_party/eigen")
+
+#-------------------------------------------------------------------------------
+# cxxopts
+#-------------------------------------------------------------------------------
+set(cxxopts_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/cxxopts/include")
 
 #-------------------------------------------------------------------------------
 # Library targets
