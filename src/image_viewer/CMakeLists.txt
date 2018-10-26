@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-project(test_libs C CXX)
+project(image_viewer C CXX)
 
 set(SOURCES
     main.cpp
@@ -14,13 +14,11 @@ set(PRIVATE_LIBRARIES
 set(PRIVATE_INCLUDES ${OpenCV_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 set(PRIVATE_INCLUDES ${cxxopts_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 set(PRIVATE_INCLUDES ${eigen_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
-# set(PRIVATE_INCLUDES ${CUDA_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 
 #-------------------------------------------------------------------------------
 # Libraries
 #-------------------------------------------------------------------------------
 set(PRIVATE_LIBRARIES ${OpenCV_LIBS} ${PRIVATE_LIBRARIES})
-# set(PRIVATE_LIBRARIES ${CUDA_LIBRARIES} ${PRIVATE_LIBRARIES})
 
 #-------------------------------------------------------------------------------
 # Final target

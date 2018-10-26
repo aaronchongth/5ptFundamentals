@@ -11,6 +11,11 @@ set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/bin")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 #-------------------------------------------------------------------------------
+# CUDA (only if you want to)
+#-------------------------------------------------------------------------------
+# find_package(CUDA REQUIRED)
+
+#-------------------------------------------------------------------------------
 # OpenCV
 #-------------------------------------------------------------------------------
 set(OpenCV_BUILD_DIR "${CMAKE_SOURCE_DIR}/deps/opencv/build")
@@ -29,7 +34,9 @@ set(cxxopts_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/cxxopts/include")
 #-------------------------------------------------------------------------------
 # Library targets
 #-------------------------------------------------------------------------------
-add_subdirectory(src/test_libs)
+# add_subdirectory(src/test_libs)
+add_subdirectory(src/data_handler)
+# add_subdirectory(src/image_viewer)
 
 #-------------------------------------------------------------------------------
 # Individual driver targets

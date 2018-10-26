@@ -47,6 +47,9 @@ International Conference on Image and Video Retrieval, pages 438-445. ACM, 2010.
 #include <opencv2/highgui.hpp>
 #include <opencv2/xfeatures2d.hpp>
 
+// #include "cuda.h"
+// #include "cuda_runtime_api.h"
+
 #include <iostream>
 #include <string>
 
