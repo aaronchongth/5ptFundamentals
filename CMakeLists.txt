@@ -9,6 +9,7 @@ set (CMAKE_CXX_STANDARD 14)
 project(5pt_fundamentals C CXX)
 set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/bin")
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+include_directories("${CMAKE_SOURCE_DIR}/src")
 
 #-------------------------------------------------------------------------------
 # CUDA (only if you want to)
@@ -29,16 +30,14 @@ set(eigen_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rd_party/eigen")
 #-------------------------------------------------------------------------------
 # cxxopts
 #-------------------------------------------------------------------------------
-set(cxxopts_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rdparty/cxxopts/include")
+set(cxxopts_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rd_party/cxxopts/include")
 
 #-------------------------------------------------------------------------------
 # Library targets
 #-------------------------------------------------------------------------------
-# add_subdirectory(src/test_libs)
 add_subdirectory(src/data_handler)
-# add_subdirectory(src/image_viewer)
 
 #-------------------------------------------------------------------------------
 # Individual driver targets
 #-------------------------------------------------------------------------------
-# add_subdirectory(src/refactor_test)
+add_subdirectory(src/image_viewer)

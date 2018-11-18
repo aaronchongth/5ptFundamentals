@@ -2,7 +2,6 @@
 project(data_handler C CXX)
 
 set(SOURCES
-    main.cpp
     data_handler.cpp
 )
 
@@ -22,13 +21,12 @@ set(PRIVATE_INCLUDES ${eigen_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 set(PRIVATE_LIBRARIES ${OpenCV_LIBS} ${PRIVATE_LIBRARIES})
 
 #-------------------------------------------------------------------------------
-# Final target
+# Final library target
 #-------------------------------------------------------------------------------
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE
                       ${PRIVATE_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
                            PRIVATE
                            ${PRIVATE_INCLUDES})
-
