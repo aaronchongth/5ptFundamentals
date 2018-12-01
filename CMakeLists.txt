@@ -20,7 +20,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 # OpenCV
 #-------------------------------------------------------------------------------
 set(OpenCV_BUILD_DIR "${CMAKE_SOURCE_DIR}/deps/opencv/build")
-find_package(OpenCV 3.4.0 REQUIRED HINTS ${OpenCV_BUILD_DIR})
+find_package(OpenCV 3.4.0 PATHS ${OpenCV_BUILD_DIR})
 
 #-------------------------------------------------------------------------------
 # Eigen
@@ -41,3 +41,4 @@ add_subdirectory(src/data_handler)
 # Individual driver targets
 #-------------------------------------------------------------------------------
 add_subdirectory(src/image_viewer)
+add_subdirectory(src/5pt_algo)
