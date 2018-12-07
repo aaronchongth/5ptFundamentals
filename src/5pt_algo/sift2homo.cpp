@@ -184,10 +184,10 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
     // decompose affine
     // find the error
 
-    if (curr_error < best_error) {
-      best_error = curr_error;
-      best_
-    }
+    // if (curr_error < best_error) {
+    //   best_error = curr_error;
+    //   best_
+    // }
   }
 
   return true;
