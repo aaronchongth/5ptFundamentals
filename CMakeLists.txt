@@ -36,6 +36,7 @@ set(cxxopts_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rd_party/cxxopts/include")
 # Library targets
 #-------------------------------------------------------------------------------
 add_subdirectory(src/data_handler)
+add_subdirectory(src/utilities)
 
 #-------------------------------------------------------------------------------
 # Individual driver targets

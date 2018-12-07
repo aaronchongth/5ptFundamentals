@@ -27,8 +27,6 @@ inline void cry(std::string error_msg) {
   throw std::runtime_error(err.str().c_str());
 }
 
-bool normalize(Mat& points_1, Mat& points_2, Mat& T_1, Mat& T_2);
-
 bool ransac(int iterations, double threshold, double confidence,
             const vector<DMatch>& matches, const vector<KeyPoint>& keypoints_1,
             const vector<KeyPoint>& keypoints_2, Mat& F);

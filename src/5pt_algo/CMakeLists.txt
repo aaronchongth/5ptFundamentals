@@ -22,6 +22,7 @@ set(PRIVATE_INCLUDES ${eigen_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 #-------------------------------------------------------------------------------
 set(PRIVATE_LIBRARIES ${OpenCV_LIBS} ${PRIVATE_LIBRARIES})
 set(PRIVATE_LIBRARIES data_handler ${PRIVATE_LIBRARIES})
+set(PRIVATE_LIBRARIES utilities ${PRIVATE_LIBRARIES})
 
 #-------------------------------------------------------------------------------
 # Final target
