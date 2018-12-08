@@ -19,7 +19,7 @@ int main() {
   auto t0 = chrono::system_clock::now();
   // parameters for GCRANSAC
   int iterations = 1000;
-  float threshold = 3.0;
+  float threshold = 0.1;
   float confidence = 0.99;
   Mat fundamental_matrix(3, 3, CV_64F);
   // start ransac loop
@@ -33,7 +33,8 @@ int main() {
       chrono::system_clock::now() - t0);
   int ms_passed = (int)duration.count();
   cout << "One iteration takes: " << ms_passed << " milliseconds" << endl;
-  // cout << "Number of matches found: " << matches.size() << endl;
 
-  cout << "All done." << endl;
+  // for plotting
+  plot_testing(img_1, img_2, keypoints_1, keypoints_2, good_matches,
+               fundamental_matrix, threshold);
 }

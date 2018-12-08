@@ -1,8 +1,8 @@
 #include "utilities.hpp"
 #include <iostream>
 #include "data_handler/data_handler.hpp"
-#include "opencv2/features2d/features2d.hpp"
 #include "math.h"
+#include "opencv2/features2d/features2d.hpp"
 #include "opencv2/xfeatures2d.hpp"
 
 using namespace cv;
@@ -100,43 +100,41 @@ bool get_matched_images(Mat& img_1, std::vector<KeyPoint>& keypoints_1,
   return true;
 }
 
-unsigned int num_inliers(const std::vector<KeyPoint>& keypoints_1, const std::vector<KeyPoint>& keypoints_2, 
-                         const Mat& F, const std::vector<DMatch>& good_matches, 
-                         const double threshold)
-{
+unsigned int num_inliers(const std::vector<KeyPoint>& keypoints_1,
+                         const std::vector<KeyPoint>& keypoints_2, const Mat& F,
+                         const std::vector<DMatch>& good_matches,
+                         const double threshold) {
   // check each point to see if it's an inlier
   int n_inliers = 0;
   int n_matches = good_matches.size();
-  for (int j = 0; j < n_matches; j++)
-  {
+  for (int j = 0; j < n_matches; j++) {
     const DMatch* this_match = &good_matches[j];
     Point2f pt1 = keypoints_1[this_match->queryIdx].pt;
     Point2f pt2 = keypoints_2[this_match->trainIdx].pt;
 
     double pt1_d[3] = {pt1.x, pt1.y, 1};
-    Mat pt1_m(3,1,CV_64F, pt1_d);
+    Mat pt1_m(3, 1, CV_64F, pt1_d);
     double pt2_d[3] = {pt2.x, pt2.y, 1};
-    Mat pt2_m(3,1,CV_64F, pt2_d);
+    Mat pt2_m(3, 1, CV_64F, pt2_d);
 
     // get epipolar lines and normalize
-    Mat l1(3,1,CV_64F);
-    Mat l2(3,1,CV_64F);
+    Mat l1(3, 1, CV_64F);
+    Mat l2(3, 1, CV_64F);
     l1 = pt2_m.t() * F;
-    l1 /= std::sqrt(l1.at<double>(0,0)*l1.at<double>(0,0) +
-                    l1.at<double>(0,1)*l1.at<double>(0,1) +
-                    l1.at<double>(0,2)*l1.at<double>(0,2));
+    l1 /= std::sqrt(l1.at<double>(0, 0) * l1.at<double>(0, 0) +
+                    l1.at<double>(0, 1) * l1.at<double>(0, 1) +
+                    l1.at<double>(0, 2) * l1.at<double>(0, 2));
     l2 = F * pt1_m;
-    l2 /= std::sqrt(l2.at<double>(0,0)*l2.at<double>(0,0) +
-                    l2.at<double>(1,0)*l2.at<double>(1,0) +
-                    l2.at<double>(2,0)*l2.at<double>(2,0));
+    l2 /= std::sqrt(l2.at<double>(0, 0) * l2.at<double>(0, 0) +
+                    l2.at<double>(1, 0) * l2.at<double>(1, 0) +
+                    l2.at<double>(2, 0) * l2.at<double>(2, 0));
 
     Mat e1 = l1 * pt1_m;
     Mat e2 = pt2_m.t() * l2;
-    double dist = (abs(e1.at<double>(0,0)) + 
-                    abs(e2.at<double>(0,0))) / 2.0f;
+    double dist = (abs(e1.at<double>(0, 0)) + abs(e2.at<double>(0, 0))) / 2.0f;
 
     if (dist < threshold) n_inliers++;
-  } // end for each point
+  }  // end for each point
 
   return n_inliers;
 }
@@ -164,14 +162,95 @@ bool overconstrained_DLT(const Mat& points_1, const Mat& points_2, Mat& F) {
   }
 
   // this function assumes A is overconstrained, so only 1 solution to F
-  Mat W(points_1.cols, 1, CV_64F);
-  Mat U(points_1.cols, 9, CV_64F);
-  Mat Vt(9, points_1.cols, CV_64F);
+  Mat W(9, 1, CV_64F);
+  Mat U(A.rows, 9, CV_64F);
+  Mat Vt(9, 9, CV_64F);
   Mat f(9, 1, CV_64F);
   SVDecomp(A, W, U, Vt, SVD::MODIFY_A + SVD::FULL_UV);
-  Mat tmp_f = Vt.col(8);
+
+  Mat V = Vt.t();
+  Mat tmp_f = V.col(V.cols - 1);
   tmp_f.copyTo(f);
   F = f.reshape(1, 3);
 
+  // for (int i = 0; i < points_1.cols; i++) {
+  //   double u1 = points_1.at<double>(0, i);
+  //   double v1 = points_1.at<double>(1, i);
+  //   double u2 = points_2.at<double>(0, i);
+  //   double v2 = points_2.at<double>(1, i);
+
+  //   // test of x'^T * F * x = 0
+  //   double pt1_d[3] = {u1, v1, 1};
+  //   double pt2_d[3] = {u2, v2, 1};
+  //   Mat pt1_m(3, 1, CV_64F, pt1_d);
+  //   Mat pt2_m(3, 1, CV_64F, pt2_d);
+  //   std::cout << "test: " << pt2_m.t() * F * pt1_m << std::endl;
+  // }
+
   return true;
+}
+
+bool plot_testing(const Mat& img_1, const Mat& img_2,
+                  const std::vector<KeyPoint>& keypoints_1,
+                  const std::vector<KeyPoint>& keypoints_2,
+                  std::vector<DMatch>& good_matches, const Mat& F,
+                  float threshold) {
+  std::vector<KeyPoint> inliers_1 = std::vector<KeyPoint>();
+  std::vector<KeyPoint> inliers_2 = std::vector<KeyPoint>();
+  std::vector<DMatch> inlier_matches = std::vector<DMatch>();
+  std::vector<DMatch> inlier_non_matches = std::vector<DMatch>();
+  // check each point to see if it's an inlier
+  for (int j = 0; j < good_matches.size(); j++) {
+    // get point info
+    // unsigned int ind = inds[j];
+    unsigned int ind = j;
+    DMatch* this_match = &good_matches[ind];
+    Point2f pt1 = keypoints_1[this_match->queryIdx].pt;
+    Point2f pt2 = keypoints_2[this_match->trainIdx].pt;
+
+    double pt1_d[3] = {pt1.x, pt1.y, 1};
+    Mat pt1_m(3, 1, CV_64F, pt1_d);
+    double pt2_d[3] = {pt2.x, pt2.y, 1};
+    Mat pt2_m(3, 1, CV_64F, pt2_d);
+
+    // test of x'^T * F * x = 0
+    // std::cout << "test: " << pt2_m.t() * F * pt1_m << std::endl;
+
+    // get epipolar lines and normalize
+    Mat l1(3, 1, CV_64F);
+    Mat l2(3, 1, CV_64F);
+    l1 = pt2_m.t() * F;
+    l1 /= std::sqrt(l1.at<double>(0, 0) * l1.at<double>(0, 0) +
+                    l1.at<double>(0, 1) * l1.at<double>(0, 1) +
+                    l1.at<double>(0, 2) * l1.at<double>(0, 2));
+    l2 = F * pt1_m;
+    l2 /= std::sqrt(l2.at<double>(0, 0) * l2.at<double>(0, 0) +
+                    l2.at<double>(1, 0) * l2.at<double>(1, 0) +
+                    l2.at<double>(2, 0) * l2.at<double>(2, 0));
+
+    Mat e1 = l1 * pt1_m;
+    Mat e2 = pt2_m.t() * l2;
+    double dist = (abs(e1.at<double>(0, 0)) + abs(e2.at<double>(0, 0))) / 2.0f;
+    // std::cout << "pt1: " << pt1_m << std::endl;
+    // std::cout << "test2: " << dist << std::endl;
+
+    if (dist < threshold) {
+      DMatch to_add = DMatch(inliers_1.size(), inliers_1.size(), dist);
+      inliers_1.push_back(keypoints_1[this_match->queryIdx]);
+      inliers_2.push_back(keypoints_2[this_match->trainIdx]);
+      inlier_matches.push_back(to_add);
+    } else {
+      DMatch to_add = DMatch(inliers_1.size(), inliers_1.size(), dist);
+      inliers_1.push_back(keypoints_1[this_match->queryIdx]);
+      inliers_2.push_back(keypoints_2[this_match->trainIdx]);
+      inlier_non_matches.push_back(to_add);
+    }
+  }  // end for each point
+
+  Mat img_matches;
+  drawMatches(img_1, inliers_1, img_2, inliers_2, inlier_matches, img_matches,
+              Scalar::all(-1), Scalar::all(-1), std::vector<char>(),
+              DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+  imshow("Good Matches", img_matches);
+  waitKey(0);
 }
