@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include "5pt_algo/5pt.hpp"
+#include "7pt_algo/7pt.hpp"
+#include "opencv2/calib3d.hpp"
 #include "opencv2/core.hpp"
 #include "opencv2/features2d.hpp"
-#include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
+#include "opencv2/imgcodecs.hpp"
 #include "opencv2/xfeatures2d.hpp"
 #include "opencv2/calib3d.hpp"
 #include "opencv2/sfm.hpp"
 #include "utils.hpp"
 #include "utilities/utilities.hpp"
-#include "7pt_algo/7pt.hpp"
-#include "5pt_algo/main.hpp"
+#include "utils.hpp"
 using namespace cv;
 using namespace cv::xfeatures2d;
 
@@ -42,31 +44,30 @@ void get_Rt_from_F(const std::vector<KeyPoint>& keypoints_1, const std::vector<K
  * @function main
  * @brief Main function
  */
-int main( int argc, char** argv )
-{
+int main(int argc, char** argv) {
   Mat img_1, img_2;
   std::vector<KeyPoint> keypoints_1, keypoints_2;
   Mat descriptors_1, descriptors_2;
   std::vector<DMatch> good_matches;
-  get_matched_images(img_1, keypoints_1, descriptors_1, 
-                     img_2, keypoints_2, descriptors_2,
-                     good_matches);
+  get_matched_images(img_1, keypoints_1, descriptors_1, img_2, keypoints_2,
+                     descriptors_2, good_matches);
 
   Mat F_7, F_5;
-  get_7pt_F(img_1, keypoints_1, descriptors_1, 
-            img_2, keypoints_2, descriptors_2,
-            good_matches, F_7);
+  get_7pt_F(img_1, keypoints_1, descriptors_1, img_2, keypoints_2,
+            descriptors_2, good_matches, F_7);
 
-  // get_5pt_F(img_1, keypoints_1, descriptors_1, 
-  //           img_2, keypoints_2, descriptors_2,
-  //           good_matches, F_5);
+  get_5pt_F(img_1, keypoints_1, descriptors_1, img_2, keypoints_2,
+            descriptors_2, good_matches, F_5);
 
   double K_data[9] = {984.2439, 0, 690, 0, 980.8141, 233.1966, 0, 0, 1};
   Mat K(3, 3, CV_64F, K_data);
-  Mat R(3, 3, CV_64F);
-  Mat t(3, 1, CV_64F);
-  get_Rt_from_F(keypoints_1, keypoints_2, good_matches, K, F_7, R, t);
+  Mat R_7(3, 3, CV_64F), R_5(3, 3, CV_64F);
+  Mat t_7(3, 1, CV_64F), t_5(3, 1, CV_64F);
+  get_Rt_from_F(keypoints_1, keypoints_2, good_matches, K, F_7, R_7, t_7);
+  get_Rt_from_F(keypoints_1, keypoints_2, good_matches, K, F_5, R_5, t_5);
 
-  std::cout << R << std::endl;
-  std::cout << t << std::endl;
+  std::cout << R_7 << std::endl;
+  std::cout << R_5 << std::endl;
+  std::cout << t_7 << std::endl;
+  std::cout << t_5 << std::endl;
 }
