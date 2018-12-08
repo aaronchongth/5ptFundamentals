@@ -127,7 +127,8 @@ bool overconstrained_DLT(const Mat& points_1, const Mat& points_2, Mat& F) {
   Mat Vt(9, points_1.cols, CV_64F);
   Mat f(9, 1, CV_64F);
   SVDecomp(A, W, U, Vt, SVD::MODIFY_A + SVD::FULL_UV);
-  f.push_back(Vt.col(5));
+  Mat tmp_f = Vt.col(8);
+  tmp_f.copyTo(f);
   F = f.reshape(1, 3);
 
   return true;

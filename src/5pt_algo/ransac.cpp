@@ -78,6 +78,4 @@ bool ransac(int iterations, double threshold, double confidence,
     // cut off when max iterations achieved
     if (iter > max_iterations) break;
   }
-
-  cout << "All done." << endl;
 }
