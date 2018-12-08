@@ -1,6 +1,5 @@
+#include "main.hpp"
 #include "ransac.hpp"
-#include "utilities/utilities.hpp"
-#include "utils.hpp"
 
 using namespace std;
 using namespace cv;
@@ -8,14 +7,10 @@ using namespace Eigen;
 using namespace cv::xfeatures2d;
 namespace opt = cxxopts;
 
-int main() {
-  Mat img_1, img_2;
-  std::vector<KeyPoint> keypoints_1, keypoints_2;
-  Mat descriptors_1, descriptors_2;
-  std::vector<DMatch> good_matches;
-  get_matched_images(img_1, keypoints_1, descriptors_1, img_2, keypoints_2,
-                     descriptors_2, good_matches);
-
+void get_5pt_F(Mat& img_1, std::vector<KeyPoint>& keypoints_1,
+               Mat& descriptors_1, Mat& img_2,
+               std::vector<KeyPoint>& keypoints_2, Mat& descriptors_2,
+               std::vector<DMatch>& good_matches, Mat& fund) {
   auto t0 = chrono::system_clock::now();
   // parameters for GCRANSAC
   int iterations = 1000;
@@ -34,7 +29,6 @@ int main() {
   int ms_passed = (int)duration.count();
   cout << "One iteration takes: " << ms_passed << " milliseconds" << endl;
 
-  // for plotting
-  plot_testing(img_1, img_2, keypoints_1, keypoints_2, good_matches,
-               fundamental_matrix, threshold);
+  fund = fundamental_matrix;
+  cout << "All done." << endl;
 }

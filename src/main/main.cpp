@@ -9,6 +9,8 @@
 #include "opencv2/calib3d.hpp"
 #include "utils.hpp"
 #include "utilities/utilities.hpp"
+#include "7pt_algo/7pt.hpp"
+#include "5pt_algo/main.hpp"
 using namespace cv;
 using namespace cv::xfeatures2d;
 
@@ -25,4 +27,13 @@ int main( int argc, char** argv )
   get_matched_images(img_1, keypoints_1, descriptors_1, 
                      img_2, keypoints_2, descriptors_2,
                      good_matches);
+
+  Mat F_7, F_5;
+  get_7pt_F(img_1, keypoints_1, descriptors_1, 
+                        img_2, keypoints_2, descriptors_2,
+                        good_matches, F_7);
+
+  get_5pt_F(img_1, keypoints_1, descriptors_1, 
+                        img_2, keypoints_2, descriptors_2,
+                        good_matches, F_5);
 }

@@ -22,13 +22,12 @@ set(PRIVATE_INCLUDES ${eigen_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 # Libraries
 #-------------------------------------------------------------------------------
 set(PRIVATE_LIBRARIES ${OpenCV_LIBS} ${PRIVATE_LIBRARIES})
-set(PRIVATE_LIBRARIES data_handler ${PRIVATE_LIBRARIES})
 set(PRIVATE_LIBRARIES utilities ${PRIVATE_LIBRARIES})
 
 #-------------------------------------------------------------------------------
-# Final target
+# Final library target
 #-------------------------------------------------------------------------------
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE
                       ${PRIVATE_LIBRARIES})
