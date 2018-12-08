@@ -63,6 +63,11 @@ bool normalize(Mat& m1, Mat& m2, Mat& T1, Mat& T2)
   T1 = scale1 * shift1;
   T2 = scale2 * shift2;
 
+  // return the homogeneous coordinates of normalized points
+  unsigned int n = m1.rows;
+  hconcat(m1, Mat(n, 1, CV_64F, Scalar(1)), m1);
+  hconcat(m2, Mat(n, 1, CV_64F, Scalar(1)), m2);
+
   return true;
 }
 
