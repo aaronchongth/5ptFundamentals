@@ -15,67 +15,9 @@
 #include "opencv2/xfeatures2d.hpp"
 #include "opencv2/calib3d.hpp"
 #include "utils.hpp"
+#include "utilities/utilities.hpp"
 using namespace cv;
 using namespace cv::xfeatures2d;
-void readme();
-
-
-void normColumn(Mat& m, unsigned int col, double& mn, double& avg_dist)
-{
-  unsigned int n = 7;
-  mn = 0;
-
-  for (int i = 0; i < 7; i++)
-  {
-    mn = mn + m.at<double>(i,col);
-  }
-
-  mn /= n;
-
-
-  for (int i = 0; i < 7; i++)
-  {
-    m.at<double>(i,col) = m.at<double>(i,col) - mn;
-  }
-
-  avg_dist = 0;
-
-  for (int i = 0; i < 7; i++)
-  {
-    avg_dist += abs(m.at<double>(i,col) - mn);
-  }
-
-  avg_dist /= n;
-
-  for (int i = 0; i < 7; i++)
-  {
-    m.at<double>(i,col)  /= avg_dist;
-  }
-}
-
-void normPoints(Mat& m1, Mat& m2, Mat& T1, Mat& T2)
-{
-  double mn_x1, mn_y1, mn_x2, mn_y2;
-  double avg_dist_x1, avg_dist_y1, avg_dist_x2, avg_dist_y2;
-
-  normColumn(m1, 0, mn_x1, avg_dist_x1);
-  normColumn(m1, 1, mn_y1, avg_dist_y1);
-  normColumn(m2, 0, mn_x2, avg_dist_x2);
-  normColumn(m2, 1, mn_y2, avg_dist_y2);
-
-  double data11[9] = {1/avg_dist_x1, 0, 0, 0, 1/avg_dist_y1, 0, 0, 0, 1.0f};
-  Mat scale1( 3, 3, CV_64F, data11 );
-  double data12[9] = {1, 0, -mn_x1, 0, 1, -mn_y1, 0, 0, 1};
-  Mat shift1( 3, 3, CV_64F, data12 );
-
-  double data21[9] = {1/avg_dist_x2, 0, 0, 0, 1/avg_dist_y2, 0, 0, 0, 1.0f};
-  Mat scale2( 3, 3, CV_64F, data21 );
-  double data22[9] = {1, 0, -mn_x2, 0, 1, -mn_y2, 0, 0, 1};
-  Mat shift2( 3, 3, CV_64F, data22 );
-
-  T1 = scale1 * shift1;
-  T2 = scale2 * shift2;
-}
 
 std::vector<Mat> run7Point( Mat _m1, Mat _m2)
 {
@@ -93,7 +35,7 @@ std::vector<Mat> run7Point( Mat _m1, Mat _m2)
   std::vector<Mat> ret = std::vector<Mat>();
   int i, k, n;
 
-  normPoints(_m1, _m2, T1, T2);
+  normalize(_m1, _m2, T1, T2);
 
   // form a linear system: i-th row of A(=a) represents
   // the equation: (m2[i], 1)'*F*(m1[i], 1) = 0
@@ -209,36 +151,13 @@ std::vector<Mat> run7Point( Mat _m1, Mat _m2)
  */
 int main( int argc, char** argv )
 {
-  dataConfig data_config;
-  KITTIDataHandler data_handler(data_config);
-
   Mat img_1, img_2;
-  if (data_handler.get_next_image(img_1)) cout << endl;
-  if (data_handler.get_next_image(img_2)) cout << endl;
-
-  //-- Step 1: Detect the keypoints using SIFT Detector, compute the descriptors
-  int minHessian = 400;
-  Ptr<SIFT> detector = SIFT::create();
   std::vector<KeyPoint> keypoints_1, keypoints_2;
   Mat descriptors_1, descriptors_2;
-  detector->detectAndCompute( img_1, Mat(), keypoints_1, descriptors_1 );
-  detector->detectAndCompute( img_2, Mat(), keypoints_2, descriptors_2 );
-
-  //-- Step 2: Matching descriptor vectors using FLANN matcher
-  FlannBasedMatcher matcher;
-  std::vector< std::vector< DMatch > > matches;
-  matcher.knnMatch( descriptors_1, descriptors_2, matches, 2 );
-
-  // get good matches
-  std::vector< DMatch > good_matches;
-  float ratio = 0.5f;
-  for( int i = 0; i < descriptors_1.rows; i++ )
-  { 
-    if (matches[i][0].distance < ratio * matches[i][1].distance)
-    { 
-      good_matches.push_back( matches[i][0]); 
-    }
-  }
+  std::vector<DMatch> good_matches;
+  get_matched_images(img_1, keypoints_1, descriptors_1, 
+                     img_2, keypoints_2, descriptors_2,
+                     good_matches);
 
   //-- Step 3: Calculate fundamental matrix
 
@@ -254,19 +173,19 @@ int main( int argc, char** argv )
   {
     Mat pts1(7,2,CV_64F);
     Mat pts2(7,2,CV_64F);
-    std::vector<unsigned int> inds = std::vector<unsigned int>();
+    // std::vector<unsigned int> inds = std::vector<unsigned int>();
     // select matches and set up matrices
     for (unsigned int i = 0; i < 7; i++)
     {
       unsigned int ind = rand() % n_matches;
-      inds.push_back(ind);
+      // inds.push_back(ind);
       DMatch* this_match = &good_matches[ind];
       Point2f pt1 = keypoints_1[this_match->queryIdx].pt;
       Point2f pt2 = keypoints_2[this_match->trainIdx].pt;
-      pts1.at<double>(i,0) = (double)pt1.x;
-      pts1.at<double>(i,1) = (double)pt1.y;
-      pts2.at<double>(i,0) = (double)pt2.x;
-      pts2.at<double>(i,1) = (double)pt2.y;
+      pts1.at<double>(i,0) = pt1.x;
+      pts1.at<double>(i,1) = pt1.y;
+      pts2.at<double>(i,0) = pt2.x;
+      pts2.at<double>(i,1) = pt2.y;
     }
 
     // compute possible Fs based on those matches

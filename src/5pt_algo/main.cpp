@@ -1,6 +1,7 @@
 // #include "ransac.hpp"
 // #include "sift2homo.hpp"
 #include "utils.hpp"
+#include "utilities/utilities.hpp"
 
 using namespace std;
 using namespace cv;
@@ -9,40 +10,15 @@ using namespace cv::xfeatures2d;
 namespace opt = cxxopts;
 
 int main() {
-  dataConfig data_config;
-  KITTIDataHandler data_handler(data_config);
-
-  // get first images
-  Mat img_1;
-  if (data_handler.get_next_image(img_1)) cout << endl;
-
-  // get the first set of SIFT and descriptors
-  int n_features = 1000;
-  Ptr<SIFT> detector = SIFT::create();
-  vector<KeyPoint> keypoints_1, keypoints_2;
+  Mat img_1, img_2;
+  std::vector<KeyPoint> keypoints_1, keypoints_2;
   Mat descriptors_1, descriptors_2;
-  detector->detectAndCompute(img_1, Mat(), keypoints_1, descriptors_1);
-
-  // start timing and handle second image
-  auto t0 = chrono::system_clock::now();
-  Mat img_2;
-  if (data_handler.get_next_image(img_2)) cout << endl;
-  detector->detectAndCompute(img_2, Mat(), keypoints_2, descriptors_2);
-
-  // matching using FLANN matcher
-  FlannBasedMatcher matcher;
-  std::vector<std::vector<DMatch> > matches;
-  matcher.knnMatch(descriptors_1, descriptors_2, matches, 2);
-
-  // get the good matches
   std::vector<DMatch> good_matches;
-  float ratio = 0.5f;
-  for (int i = 0; i < descriptors_1.rows; i++) {
-    if (matches[i][0].distance < ratio * matches[i][1].distance) {
-      good_matches.push_back(matches[i][0]);
-    }
-  }
+  get_matched_images(img_1, keypoints_1, descriptors_1, 
+                     img_2, keypoints_2, descriptors_2,
+                     good_matches);
 
+  auto t0 = chrono::system_clock::now();
   // parameters for GCRANSAC
   int iterations = 1000;
   float threshold = 3.0;
@@ -59,7 +35,7 @@ int main() {
       chrono::system_clock::now() - t0);
   int ms_passed = (int)duration.count();
   cout << "One iteration takes: " << ms_passed << " milliseconds" << endl;
-  cout << "Number of matches found: " << matches.size() << endl;
+  // cout << "Number of matches found: " << matches.size() << endl;
 
   // visualize the matches
   // Mat img_matches;

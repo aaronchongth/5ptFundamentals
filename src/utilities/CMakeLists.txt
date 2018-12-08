@@ -14,6 +14,7 @@ set(PRIVATE_LIBRARIES
 set(PRIVATE_INCLUDES ${OpenCV_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 set(PRIVATE_INCLUDES ${cxxopts_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 set(PRIVATE_INCLUDES ${eigen_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
+set(PRIVATE_LIBRARIES data_handler ${PRIVATE_LIBRARIES})
 
 #-------------------------------------------------------------------------------
 # Libraries

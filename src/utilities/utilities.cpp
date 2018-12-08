@@ -1,55 +1,101 @@
 #include "utilities.hpp"
+#include <iostream>
+#include "data_handler/data_handler.hpp"
+#include "opencv2/xfeatures2d.hpp"
+#include "opencv2/features2d/features2d.hpp"
 
-// using namespace Eigen;
 using namespace cv;
+using namespace cv::xfeatures2d;
 
-bool normalize(Mat& points_1, Mat& points_2, Mat& T_1, Mat& T_2) {
-  // Mat row_mean, col_mean;
-  // reduce(img, row_mean, 0, CV_REDUCE_AVG);
-  // reduce(img, col_mean, 1, CV_REDUCE_AVG);
+void normColumn(Mat& m, unsigned int col, double& mn, double& avg_dist)
+{
+  unsigned int n = m.rows;
+  mn = 0;
 
-  Mat points_1_mean, points_2_mean;
-  reduce(points_1, points_1_mean, 0, CV_REDUCE_AVG);
-  reduce(points_2, points_2_mean, 0, CV_REDUCE_AVG);
-  for (int i = 0; i < points_1.rows; i++) {
-    points_1.row(i) -= points_1_mean;
-    points_2.row(i) -= points_2_mean;
+  for (int i = 0; i < n; i++)
+  {
+    mn = mn + m.at<double>(i,col);
   }
 
-  double avg_dist_1 = 0;
-  double avg_dist_2 = 0;
-  for (int i = 0; i < 5; i++) {
-    avg_dist_1 += norm(points_1.row(i));
-    avg_dist_2 += norm(points_2.row(i));
+  mn /= n;
+
+
+  for (int i = 0; i < n; i++)
+  {
+    m.at<double>(i,col) = m.at<double>(i,col) - mn;
   }
-  avg_dist_1 /= 5;
-  avg_dist_2 /= 5;
-  double avg_ratio_1 = sqrt(2) / avg_dist_1;
-  double avg_ratio_2 = sqrt(2) / avg_dist_2;
 
-  points_1 *= avg_ratio_1;
-  points_2 *= avg_ratio_2;
+  avg_dist = 0;
 
-  double avg_arr_1[9] = {avg_ratio_1, 0, 0, 0, avg_dist_1, 0, 0, 0, 1};
-  double mass_arr_1[9] = {1, 0, -points_1_mean.at<double>(0),
-                          0, 1, -points_1_mean.at<double>(1),
-                          0, 0, 1};
-  double avg_arr_2[9] = {avg_ratio_2, 0, 0, 0, avg_dist_2, 0, 0, 0, 1};
-  double mass_arr_2[9] = {1, 0, -points_2_mean.at<double>(0),
-                          0, 1, -points_2_mean.at<double>(1),
-                          0, 0, 1};
-  Mat avg_mat_1(3, 3, CV_64F, avg_arr_1);
-  Mat mass_mat_1(3, 3, CV_64F, mass_arr_1);
-  Mat avg_mat_2(3, 3, CV_64F, avg_arr_2);
-  Mat mass_mat_2(3, 3, CV_64F, mass_arr_2);
+  for (int i = 0; i < n; i++)
+  {
+    avg_dist += abs(m.at<double>(i,col) - mn);
+  }
 
-  // return the trasform matrices
-  T_1 = avg_mat_1 * mass_mat_1;
-  T_2 = avg_mat_2 * mass_mat_2;
+  avg_dist /= n;
 
-  // return the homogeneous coordinates of normalized points
-  hconcat(points_1, Mat(5, 1, CV_64F, Scalar(1)), points_1);
-  hconcat(points_2, Mat(5, 1, CV_64F, Scalar(1)), points_2);
+  for (int i = 0; i < n; i++)
+  {
+    m.at<double>(i,col)  /= avg_dist;
+  }
+}
+
+bool normalize(Mat& m1, Mat& m2, Mat& T1, Mat& T2)
+{
+  double mn_x1, mn_y1, mn_x2, mn_y2;
+  double avg_dist_x1, avg_dist_y1, avg_dist_x2, avg_dist_y2;
+
+  normColumn(m1, 0, mn_x1, avg_dist_x1);
+  normColumn(m1, 1, mn_y1, avg_dist_y1);
+  normColumn(m2, 0, mn_x2, avg_dist_x2);
+  normColumn(m2, 1, mn_y2, avg_dist_y2);
+
+  double data11[9] = {1/avg_dist_x1, 0, 0, 0, 1/avg_dist_y1, 0, 0, 0, 1.0f};
+  Mat scale1( 3, 3, CV_64F, data11 );
+  double data12[9] = {1, 0, -mn_x1, 0, 1, -mn_y1, 0, 0, 1};
+  Mat shift1( 3, 3, CV_64F, data12 );
+
+  double data21[9] = {1/avg_dist_x2, 0, 0, 0, 1/avg_dist_y2, 0, 0, 0, 1.0f};
+  Mat scale2( 3, 3, CV_64F, data21 );
+  double data22[9] = {1, 0, -mn_x2, 0, 1, -mn_y2, 0, 0, 1};
+  Mat shift2( 3, 3, CV_64F, data22 );
+
+  T1 = scale1 * shift1;
+  T2 = scale2 * shift2;
+
+  return true;
+}
+
+bool get_matched_images(Mat& img_1, std::vector<KeyPoint>& keypoints_1, Mat& descriptors_1, 
+                        Mat& img_2, std::vector<KeyPoint>& keypoints_2, Mat& descriptors_2,
+                        std::vector<DMatch>& good_matches)
+{
+  static dataConfig data_config;
+  static KITTIDataHandler data_handler(data_config);
+
+  // get first images
+  if (data_handler.get_next_image(img_1)) std::cout << std::endl;
+
+  // get the first set of SIFT and descriptors
+  Ptr<SIFT> detector = SIFT::create();
+  detector->detectAndCompute(img_1, Mat(), keypoints_1, descriptors_1);
+
+  // start timing and handle second image
+  if (data_handler.get_next_image(img_2)) std::cout << std::endl;
+  detector->detectAndCompute(img_2, Mat(), keypoints_2, descriptors_2);
+
+  // matching using FLANN matcher
+  FlannBasedMatcher matcher;
+  std::vector<std::vector<DMatch> > matches;
+  matcher.knnMatch(descriptors_1, descriptors_2, matches, 2);
+
+  // get the good matches
+  float ratio = 0.5f;
+  for (int i = 0; i < descriptors_1.rows; i++) {
+    if (matches[i][0].distance < ratio * matches[i][1].distance) {
+      good_matches.push_back(matches[i][0]);
+    }
+  }
 
   return true;
 }
