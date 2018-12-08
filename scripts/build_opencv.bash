@@ -61,7 +61,7 @@ cmake \
     -DINSTALL_C_EXAMPLES=OFF \
     -DINSTALL_TESTS=OFF \
     -DOPENCV_EXTRA_MODULES_PATH=$OPENCV_CONTRIB_DIR/modules \
-    -DBUILD_LIST=features2d,xfeatures2d,highgui,imgcodecs,imgprocs,calib3d,videoio,video,flann \
+    -DBUILD_LIST=features2d,xfeatures2d,highgui,imgcodecs,imgprocs,calib3d,videoio,video,flann,sfm \
     ..
 
 echo ">[BUILD]<DONE>< Running OpenCV cmake"
