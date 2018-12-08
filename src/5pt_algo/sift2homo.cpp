@@ -179,14 +179,10 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
     double y2 = points_2.at<double>(k, 1);
     Mat A(2, 2, CV_64F);
     homography_to_affine(H, x1, y1, x2, y2, A);
-    // if (homography_to_affine(H, x1, y1, x2, y2, A))
-    //   cout << "Homography to affine done." << endl;
 
     // decompose affine
     double sx, sy, alpha, w;
     decompose_affine(A, sx, sy, alpha, w);
-    // if (decompose_affine(A, sx, sy, alpha, w))
-    //   cout << "Affine decomposed." << endl;
 
     // find the error, and try to update
     double curr_error = abs(alpha - angles.at<double>(k));
