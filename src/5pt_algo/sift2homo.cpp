@@ -35,7 +35,6 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
     A.at<double>(i + 1, 8) = y_2;
   }
   A = A / norm(A);
-  // cout << "reached A." << endl;
 
   // there is 9 - 6 = 3 dof left
   // H = alpha * h1 + beta * h2 + h3
@@ -74,14 +73,12 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
   double n37 = N.at<double>(6, 2);
   double n38 = N.at<double>(7, 2);
   double n39 = N.at<double>(8, 2);
-  // cout << "After n." << endl;
 
   // estimate homography parameters
-  int p[] = {0, 1, 2};
-  sort(p, p + 3);
+  vector<int> p = {0, 1, 2};
   double best_error = DBL_MAX;
   Mat best_hom;
-  while (next_permutation(p, p + 3)) {
+  while (next_permutation(p.begin(), p.end())) {
     int m = p[0];
     int n = p[1];
     double a1 = angles.at<double>(m, 0);
@@ -193,6 +190,9 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
       best_hom = H;
     }
   }
+
+  // check if homography found, if not, return false
+  if (best_hom.empty()) return false;
 
   // normalize the best homography
   homography = best_hom / best_hom.at<double>(2, 2);

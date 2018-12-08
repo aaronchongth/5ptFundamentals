@@ -21,12 +21,6 @@ using namespace std;
 using namespace cv;
 using namespace Eigen;
 
-inline void cry(std::string error_msg) {
-  std::ostringstream err;
-  err << error_msg;
-  throw std::runtime_error(err.str().c_str());
-}
-
 bool ransac(int iterations, double threshold, double confidence,
             const vector<DMatch>& matches, const vector<KeyPoint>& keypoints_1,
             const vector<KeyPoint>& keypoints_2, int img_width, int img_height,
