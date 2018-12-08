@@ -16,6 +16,7 @@
 #include "opencv2/calib3d.hpp"
 #include "utils.hpp"
 #include "utilities/utilities.hpp"
+#include <math.h>
 using namespace cv;
 using namespace cv::xfeatures2d;
 
@@ -168,7 +169,7 @@ int main( int argc, char** argv )
   unsigned int n_inliers = 0;
   unsigned int best_inliers = 0;
   Mat best_F(3,3,CV_64F);
-  double threshold = 0.0000001;
+  double threshold = 0.01;
   for (unsigned int it = 0; it < its; it++)
   {
     Mat pts1(7,2,CV_64F);
@@ -194,52 +195,8 @@ int main( int argc, char** argv )
     // for each solution, try it out
     for (int i = 0; i < sols.size(); i++)
     {
-      // init
-      n_inliers = 0;
       Mat F = sols[i];
-      // std::cout << F << std::endl;
-
-      // check each point to see if it's an inlier
-      for (int j = 0; j < n_matches; j++)
-      // for (int j = 0; j < n_matches; j++)
-      {
-        // get point info
-        // unsigned int ind = inds[j];
-        unsigned int ind = j;
-        DMatch* this_match = &good_matches[ind];
-        Point2f pt1 = keypoints_1[this_match->queryIdx].pt;
-        Point2f pt2 = keypoints_2[this_match->trainIdx].pt;
-
-        double pt1_d[3] = {pt1.x, pt1.y, 1};
-        Mat pt1_m(3,1,CV_64F, pt1_d);
-        double pt2_d[3] = {pt2.x, pt2.y, 1};
-        Mat pt2_m(3,1,CV_64F, pt2_d);
-
-        /* test of x'^T * F * x = 0
-        */
-        // std::cout << "test: " << pt2_m.t() * F * pt1_m << std::endl;
-
-        // get epipolar lines and normalize
-        Mat l1(3,1,CV_64F);
-        Mat l2(3,1,CV_64F);
-        l1 = pt2_m.t() * F;
-        l1 /= (l1.at<double>(0,0)*l1.at<double>(0,0) +
-               l1.at<double>(0,1)*l1.at<double>(0,1) +
-               l1.at<double>(0,2)*l1.at<double>(0,2));
-        l2 = F * pt1_m;
-        l2 /= (l2.at<double>(0,0)*l2.at<double>(0,0) +
-               l2.at<double>(1,0)*l2.at<double>(1,0) +
-               l2.at<double>(2,0)*l2.at<double>(2,0));
-
-        Mat e1 = l1 * pt1_m;
-        Mat e2 = pt2_m.t() * l2;
-        double dist = (abs(e1.at<double>(0,0)) + 
-                       abs(e2.at<double>(0,0))) / 2.0f;
-        // std::cout << "pt1: " << pt1_m << std::endl;
-        // std::cout << "test2: " << dist << std::endl;
-
-        if (dist < threshold) n_inliers++;
-      } // end for each point
+      n_inliers = num_inliers(keypoints_1, keypoints_2, F, good_matches, threshold);
 
       if (n_inliers > best_inliers)
       {
@@ -254,10 +211,12 @@ int main( int argc, char** argv )
   std::cout << "best F: " << best_F << std::endl;
   std::cout << best_inliers << " out of " << n_matches << std::endl;
 
+  /*
   // for plotting!
   std::vector<KeyPoint> inliers_1 = std::vector<KeyPoint>();
   std::vector<KeyPoint> inliers_2 = std::vector<KeyPoint>();
   std::vector<DMatch> inlier_matches = std::vector<DMatch>();
+  std::vector<DMatch> inlier_non_matches = std::vector<DMatch>();
   // check each point to see if it's an inlier
   for (int j = 0; j < n_matches; j++)
   // for (int j = 0; j < n_matches; j++)
@@ -281,11 +240,11 @@ int main( int argc, char** argv )
     Mat l1(3,1,CV_64F);
     Mat l2(3,1,CV_64F);
     l1 = pt2_m.t() * best_F;
-    l1 /= (l1.at<double>(0,0)*l1.at<double>(0,0) +
+    l1 /= std::sqrt(l1.at<double>(0,0)*l1.at<double>(0,0) +
             l1.at<double>(0,1)*l1.at<double>(0,1) +
             l1.at<double>(0,2)*l1.at<double>(0,2));
     l2 = best_F * pt1_m;
-    l2 /= (l2.at<double>(0,0)*l2.at<double>(0,0) +
+    l2 /= std::sqrt(l2.at<double>(0,0)*l2.at<double>(0,0) +
             l2.at<double>(1,0)*l2.at<double>(1,0) +
             l2.at<double>(2,0)*l2.at<double>(2,0));
 
@@ -303,6 +262,13 @@ int main( int argc, char** argv )
       inliers_2.push_back(keypoints_2[this_match->trainIdx]);
       inlier_matches.push_back(to_add);
     }
+    else
+    {
+      DMatch to_add = DMatch(inliers_1.size(), inliers_1.size(), dist);
+      inliers_1.push_back(keypoints_1[this_match->queryIdx]);
+      inliers_2.push_back(keypoints_2[this_match->trainIdx]);
+      inlier_non_matches.push_back(to_add);
+    }
   } // end for each point
 
   Mat img_matches;
@@ -311,6 +277,7 @@ int main( int argc, char** argv )
                std::vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
   imshow( "Good Matches", img_matches );
   waitKey(0);
+  */
   // Let's do autocalibration to get a static K
   // use F and K to get E
   // get R and t from E
