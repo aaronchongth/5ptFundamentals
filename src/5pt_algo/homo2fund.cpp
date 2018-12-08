@@ -33,9 +33,20 @@ bool homography_to_fundamental(const Mat& H, const Mat& points_1,
 
   // put the points together, they should all be in image pixels
   // TODO: check normalization by basel
+  Mat homo_points_1(points_1.rows, 3, CV_64F);
+  Mat homo_points_2(points_2.rows, 3, CV_64F);
+  for (int i = 0; i < points_1.rows; i++) {
+    homo_points_1.at<double>(i, 0) = points_1.at<double>(i, 0);
+    homo_points_1.at<double>(i, 1) = points_1.at<double>(i, 1);
+    homo_points_1.at<double>(i, 2) = 1;
+    homo_points_2.at<double>(i, 0) = points_2.at<double>(i, 0);
+    homo_points_2.at<double>(i, 1) = points_2.at<double>(i, 1);
+    homo_points_2.at<double>(i, 2) = 1;
+  }
+
   Mat all_points_1, all_points_2;
-  hconcat(hallu_pts_1, points_1.t(), all_points_1);
-  hconcat(hallu_pts_2, points_2.t(), all_points_2);
+  hconcat(hallu_pts_1, homo_points_1.t(), all_points_1);
+  hconcat(hallu_pts_2, homo_points_2.t(), all_points_2);
 
   // solve using DLT, Af = 0
   return overconstrained_DLT(all_points_1, all_points_2, F);
