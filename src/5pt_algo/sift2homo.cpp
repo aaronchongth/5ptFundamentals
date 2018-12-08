@@ -35,6 +35,7 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
     A.at<double>(i + 1, 8) = y_2;
   }
   A = A / norm(A);
+  // cout << "reached A." << endl;
 
   // there is 9 - 6 = 3 dof left
   // H = alpha * h1 + beta * h2 + h3
@@ -64,15 +65,16 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
   double n28 = N.at<double>(7, 1);
   double n29 = N.at<double>(8, 1);
 
-  double n31 = N.at<double>(0, 3);
-  double n32 = N.at<double>(1, 3);
-  double n33 = N.at<double>(2, 3);
-  double n34 = N.at<double>(3, 3);
-  double n35 = N.at<double>(4, 3);
-  double n36 = N.at<double>(5, 3);
-  double n37 = N.at<double>(6, 3);
-  double n38 = N.at<double>(7, 3);
-  double n39 = N.at<double>(8, 3);
+  double n31 = N.at<double>(0, 2);
+  double n32 = N.at<double>(1, 2);
+  double n33 = N.at<double>(2, 2);
+  double n34 = N.at<double>(3, 2);
+  double n35 = N.at<double>(4, 2);
+  double n36 = N.at<double>(5, 2);
+  double n37 = N.at<double>(6, 2);
+  double n38 = N.at<double>(7, 2);
+  double n39 = N.at<double>(8, 2);
+  // cout << "After n." << endl;
 
   // estimate homography parameters
   int p[] = {0, 1, 2};

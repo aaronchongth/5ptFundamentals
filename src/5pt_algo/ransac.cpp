@@ -17,6 +17,8 @@ bool ransac(int iterations, double threshold, double confidence,
 
   // start iterating
   long max_iterations = LONG_MAX;
+  unsigned int best_n_inliers = 0;
+  Mat best_F(3, 3, CV_64F);
   for (int iter = 0; iter < iterations; iter++) {
     // grab the points and angles in Mat
     Mat points_1(5, 2, CV_64F);
@@ -34,15 +36,17 @@ bool ransac(int iterations, double threshold, double confidence,
 
     // normalize
     Mat T_1, T_2;
-    normalize(points_1, points_2, T_1, T_2);
+    Mat norm_points_1 = points_1.clone();
+    Mat norm_points_2 = points_2.clone();
+    normalize(norm_points_1, norm_points_2, T_1, T_2);
 
     // get homography
     Mat homography;
     Rect roi(0, 0, points_1.cols, 3);
-    if (sift_to_homography(Mat(points_1, roi), Mat(points_2, roi), angles,
-                           homography)) {
-      homography = T_2.inv() * homography * T_1;
-    }
+    if (!sift_to_homography(Mat(norm_points_1, roi), Mat(norm_points_2, roi),
+                            angles, homography))
+      cout << "Sift to homography failed." << endl;
+    homography = T_2.inv() * homography * T_1;
 
     // check the other correspondences
     bool points_too_close = false;
@@ -71,16 +75,24 @@ bool ransac(int iterations, double threshold, double confidence,
                                    img_height, fundamental_matrix))
       cout << "Fundamental matrix estimation failed." << endl;
 
-    unsigned int n_inliers;
-    double inlier_threshold = 0.01;
-    n_inliers = num_inliers(keypoints_1, keypoints_2, fundamental_matrix, matches, inlier_threshold);
-    std::cout << "Num_inliers: " << n_inliers << std::endl;
-
     // collect inliers, by estimating symmetric epipolar distance
     // for each correspondences, estimate epipolar distance
+    unsigned int n_inliers = num_inliers(
+        keypoints_1, keypoints_2, fundamental_matrix, matches, threshold);
+    if (n_inliers > best_n_inliers) {
+      best_n_inliers = n_inliers;
+      best_F = fundamental_matrix.clone();
+    }
+
     // update inliers, max iterations
+    max_iterations =
+        log(1 - confidence) /
+        log(1 - pow((double)best_n_inliers / (double)matches.size(), 5.0));
 
     // cut off when max iterations achieved
     if (iter > max_iterations) break;
   }
+  F = best_F;
+  cout << "best F: " << best_F << endl;
+  cout << best_n_inliers << " out of " << matches.size() << endl;
 }
