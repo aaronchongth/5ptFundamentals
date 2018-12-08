@@ -3,6 +3,7 @@
  * @brief SURF detector + descriptor + FLANN Matcher
  * @author A. Huaman
  */
+#include "7pt.hpp"
 #include <stdio.h>
 #include <iostream>
 #include <stdio.h>
@@ -150,18 +151,11 @@ std::vector<Mat> run7Point( Mat _m1, Mat _m2)
  * @function main
  * @brief Main function
  */
-int main( int argc, char** argv )
+int get_7pt_F(Mat& img1, std::vector<KeyPoint>& keypoints_1,
+              Mat& descriptors_1, Mat& img2,
+              std::vector<KeyPoint>& keypoints_2, Mat& descriptors_2,
+              std::vector<DMatch>& good_matches, Mat& fund)
 {
-  Mat img_1, img_2;
-  std::vector<KeyPoint> keypoints_1, keypoints_2;
-  Mat descriptors_1, descriptors_2;
-  std::vector<DMatch> good_matches;
-  get_matched_images(img_1, keypoints_1, descriptors_1, 
-                     img_2, keypoints_2, descriptors_2,
-                     good_matches);
-
-  //-- Step 3: Calculate fundamental matrix
-
   // RANSAC to find best fundamental matrix
   srand(time(NULL));
   unsigned int n_matches = good_matches.size();
@@ -210,6 +204,8 @@ int main( int argc, char** argv )
   // show results
   std::cout << "best F: " << best_F << std::endl;
   std::cout << best_inliers << " out of " << n_matches << std::endl;
+  fund = best_F;
+  return best_inliers;
 
   /*
   // for plotting!
@@ -282,12 +278,4 @@ int main( int argc, char** argv )
   // use F and K to get E
   // get R and t from E
   // yay we're done
-}
-
-/*
- * @function readme
- */
-void readme()
-{ 
-  std::cout << " Usage: ./SURF_FlannMatcher <img1> <img2>" << std::endl; 
 }
