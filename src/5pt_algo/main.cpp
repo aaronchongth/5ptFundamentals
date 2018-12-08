@@ -1,5 +1,4 @@
-// #include "ransac.hpp"
-// #include "sift2homo.hpp"
+#include "ransac.hpp"
 #include "utils.hpp"
 
 using namespace std;
@@ -18,7 +17,7 @@ int main() {
 
   // get the first set of SIFT and descriptors
   int n_features = 1000;
-  Ptr<SIFT> detector = SIFT::create();
+  Ptr<SIFT> detector = SIFT::create(n_features);
   vector<KeyPoint> keypoints_1, keypoints_2;
   Mat descriptors_1, descriptors_2;
   detector->detectAndCompute(img_1, Mat(), keypoints_1, descriptors_1);
@@ -27,9 +26,10 @@ int main() {
   auto t0 = chrono::system_clock::now();
   Mat img_2;
   if (data_handler.get_next_image(img_2)) cout << endl;
+  cout << img_2.rows << " " << img_2.cols << endl;
   detector->detectAndCompute(img_2, Mat(), keypoints_2, descriptors_2);
 
-  // matching using FLANN matcher
+  // // matching using FLANN matcher
   FlannBasedMatcher matcher;
   std::vector<std::vector<DMatch> > matches;
   matcher.knnMatch(descriptors_1, descriptors_2, matches, 2);
@@ -50,7 +50,7 @@ int main() {
   Mat fundamental_matrix(3, 3, CV_64F);
   // start ransac loop
   if (ransac(iterations, threshold, confidence, good_matches, keypoints_1,
-             keypoints_2, fundamental_matrix)) {
+             keypoints_2, img_2.cols, img_2.rows, fundamental_matrix)) {
     cout << "ransac done." << endl;
   }
 
@@ -59,7 +59,7 @@ int main() {
       chrono::system_clock::now() - t0);
   int ms_passed = (int)duration.count();
   cout << "One iteration takes: " << ms_passed << " milliseconds" << endl;
-  cout << "Number of matches found: " << matches.size() << endl;
+  // cout << "Number of matches found: " << matches.size() << endl;
 
   // visualize the matches
   // Mat img_matches;
@@ -78,11 +78,9 @@ int main() {
   // // draw keypoints
   // Mat img_keypoints_1;
   // Mat img_keypoints_2;
-  // drawKeypoints(img_1, keypoints_1, img_keypoints_1,
-  // Scalar::all(-1),
+  // drawKeypoints(img_1, keypoints_1, img_keypoints_1, Scalar::all(-1),
   //               DrawMatchesFlags::DEFAULT);
-  // drawKeypoints(img_2, keypoints_2, img_keypoints_2,
-  // Scalar::all(-1),
+  // drawKeypoints(img_2, keypoints_2, img_keypoints_2, Scalar::all(-1),
   //               DrawMatchesFlags::DEFAULT);
 
   // // show detected (drawn) keypoints

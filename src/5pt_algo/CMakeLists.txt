@@ -5,6 +5,7 @@ set(SOURCES
     main.cpp
     ransac.cpp
     sift2homo.cpp
+    homo2fund.cpp
 )
 
 set(PRIVATE_LIBRARIES

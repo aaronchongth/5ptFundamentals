@@ -40,5 +40,5 @@ add_subdirectory(src/data_handler)
 #-------------------------------------------------------------------------------
 # Individual driver targets
 #-------------------------------------------------------------------------------
-add_subdirectory(src/image_viewer)
+# add_subdirectory(src/image_viewer)
 add_subdirectory(src/5pt_algo)

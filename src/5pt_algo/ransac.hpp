@@ -31,4 +31,5 @@ bool normalize(Mat& points_1, Mat& points_2, Mat& T_1, Mat& T_2);
 
 bool ransac(int iterations, double threshold, double confidence,
             const vector<DMatch>& matches, const vector<KeyPoint>& keypoints_1,
-            const vector<KeyPoint>& keypoints_2, Mat& F);
+            const vector<KeyPoint>& keypoints_2, int img_width, int img_height,
+            Mat& F);
