@@ -73,6 +73,11 @@ bool ransac(int iterations, double threshold, double confidence,
                                    img_height, fundamental_matrix))
       cout << "Fundamental matrix estimation failed." << endl;
 
+    unsigned int n_inliers;
+    double inlier_threshold = 0.01;
+    n_inliers = num_inliers(keypoints_1, keypoints_2, fundamental_matrix, matches, inlier_threshold);
+    std::cout << "Num_inliers: " << n_inliers << std::endl;
+
     // collect inliers, by estimating symmetric epipolar distance
     // for each correspondences, estimate epipolar distance
     // update inliers, max iterations

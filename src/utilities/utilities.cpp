@@ -2,6 +2,7 @@
 #include <iostream>
 #include "data_handler/data_handler.hpp"
 #include "opencv2/features2d/features2d.hpp"
+#include "math.h"
 #include "opencv2/xfeatures2d.hpp"
 
 using namespace cv;
@@ -97,6 +98,47 @@ bool get_matched_images(Mat& img_1, std::vector<KeyPoint>& keypoints_1,
   }
 
   return true;
+}
+
+unsigned int num_inliers(const std::vector<KeyPoint>& keypoints_1, const std::vector<KeyPoint>& keypoints_2, 
+                         const Mat& F, const std::vector<DMatch>& good_matches, 
+                         const double threshold)
+{
+  // check each point to see if it's an inlier
+  int n_inliers = 0;
+  int n_matches = good_matches.size();
+  for (int j = 0; j < n_matches; j++)
+  {
+    const DMatch* this_match = &good_matches[j];
+    Point2f pt1 = keypoints_1[this_match->queryIdx].pt;
+    Point2f pt2 = keypoints_2[this_match->trainIdx].pt;
+
+    double pt1_d[3] = {pt1.x, pt1.y, 1};
+    Mat pt1_m(3,1,CV_64F, pt1_d);
+    double pt2_d[3] = {pt2.x, pt2.y, 1};
+    Mat pt2_m(3,1,CV_64F, pt2_d);
+
+    // get epipolar lines and normalize
+    Mat l1(3,1,CV_64F);
+    Mat l2(3,1,CV_64F);
+    l1 = pt2_m.t() * F;
+    l1 /= std::sqrt(l1.at<double>(0,0)*l1.at<double>(0,0) +
+                    l1.at<double>(0,1)*l1.at<double>(0,1) +
+                    l1.at<double>(0,2)*l1.at<double>(0,2));
+    l2 = F * pt1_m;
+    l2 /= std::sqrt(l2.at<double>(0,0)*l2.at<double>(0,0) +
+                    l2.at<double>(1,0)*l2.at<double>(1,0) +
+                    l2.at<double>(2,0)*l2.at<double>(2,0));
+
+    Mat e1 = l1 * pt1_m;
+    Mat e2 = pt2_m.t() * l2;
+    double dist = (abs(e1.at<double>(0,0)) + 
+                    abs(e2.at<double>(0,0))) / 2.0f;
+
+    if (dist < threshold) n_inliers++;
+  } // end for each point
+
+  return n_inliers;
 }
 
 // Does DLT, not to be confused with BLT which is also nice
