@@ -1,5 +1,4 @@
-// #include "ransac.hpp"
-// #include "sift2homo.hpp"
+#include "ransac.hpp"
 #include "utils.hpp"
 #include "utilities/utilities.hpp"
 
@@ -26,7 +25,7 @@ int main() {
   Mat fundamental_matrix(3, 3, CV_64F);
   // start ransac loop
   if (ransac(iterations, threshold, confidence, good_matches, keypoints_1,
-             keypoints_2, fundamental_matrix)) {
+             keypoints_2, img_2.cols, img_2.rows, fundamental_matrix)) {
     cout << "ransac done." << endl;
   }
 
@@ -54,11 +53,9 @@ int main() {
   // // draw keypoints
   // Mat img_keypoints_1;
   // Mat img_keypoints_2;
-  // drawKeypoints(img_1, keypoints_1, img_keypoints_1,
-  // Scalar::all(-1),
+  // drawKeypoints(img_1, keypoints_1, img_keypoints_1, Scalar::all(-1),
   //               DrawMatchesFlags::DEFAULT);
-  // drawKeypoints(img_2, keypoints_2, img_keypoints_2,
-  // Scalar::all(-1),
+  // drawKeypoints(img_2, keypoints_2, img_keypoints_2, Scalar::all(-1),
   //               DrawMatchesFlags::DEFAULT);
 
   // // show detected (drawn) keypoints

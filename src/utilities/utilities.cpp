@@ -77,7 +77,8 @@ bool get_matched_images(Mat& img_1, std::vector<KeyPoint>& keypoints_1, Mat& des
   if (data_handler.get_next_image(img_1)) std::cout << std::endl;
 
   // get the first set of SIFT and descriptors
-  Ptr<SIFT> detector = SIFT::create();
+  int n_features = 1000;
+  Ptr<SIFT> detector = SIFT::create(n_features);
   detector->detectAndCompute(img_1, Mat(), keypoints_1, descriptors_1);
 
   // start timing and handle second image

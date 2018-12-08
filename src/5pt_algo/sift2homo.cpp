@@ -5,7 +5,7 @@ using namespace cv;
 using namespace Eigen;
 
 bool sift_to_homography(const Mat& points_1, const Mat& points_2,
-                        const Mat& angles, Mat homography) {
+                        const Mat& angles, Mat& homography) {
   // construct matrix A, to find Ah = 0
   Mat A(6, 9, CV_64F);
   for (int i = 0; i < 3; i++) {
@@ -178,18 +178,26 @@ bool sift_to_homography(const Mat& points_1, const Mat& points_2,
     double x2 = points_2.at<double>(k, 0);
     double y2 = points_2.at<double>(k, 1);
     Mat A(2, 2, CV_64F);
-    if (homography_to_affine(H, x1, y1, x2, y2, A))
-      cout << "Homography to affine done." << endl;
+    homography_to_affine(H, x1, y1, x2, y2, A);
+    // if (homography_to_affine(H, x1, y1, x2, y2, A))
+    //   cout << "Homography to affine done." << endl;
 
     // decompose affine
-    // find the error
+    double sx, sy, alpha, w;
+    decompose_affine(A, sx, sy, alpha, w);
+    // if (decompose_affine(A, sx, sy, alpha, w))
+    //   cout << "Affine decomposed." << endl;
 
-    // if (curr_error < best_error) {
-    //   best_error = curr_error;
-    //   best_
-    // }
+    // find the error, and try to update
+    double curr_error = abs(alpha - angles.at<double>(k));
+    if (curr_error < best_error) {
+      best_error = curr_error;
+      best_hom = H;
+    }
   }
 
+  // normalize the best homography
+  homography = best_hom / best_hom.at<double>(2, 2);
   return true;
 }
 
@@ -215,4 +223,12 @@ bool homography_to_affine(const Mat& H, double x1, double y1, double x2,
   return true;
 }
 
-bool decompose_affine(const Mat& A) { return true; }
+bool decompose_affine(const Mat& A, double& sx, double& sy, double& alpha,
+                      double& w) {
+  alpha = atan2(A.at<double>(1, 0), A.at<double>(0, 0));
+  sx = A.at<double>(0, 0) / cos(alpha);
+  sy = (cos(alpha) * A.at<double>(1, 1) - sin(alpha) * A.at<double>(0, 1)) /
+       (cos(alpha) * cos(alpha) + sin(alpha) * sin(alpha));
+  w = (A.at<double>(0, 1) + sin(alpha) * sy) / cos(alpha);
+  return true;
+}

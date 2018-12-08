@@ -29,4 +29,5 @@ inline void cry(std::string error_msg) {
 
 bool ransac(int iterations, double threshold, double confidence,
             const vector<DMatch>& matches, const vector<KeyPoint>& keypoints_1,
-            const vector<KeyPoint>& keypoints_2, Mat& F);
+            const vector<KeyPoint>& keypoints_2, int img_width, int img_height,
+            Mat& F);

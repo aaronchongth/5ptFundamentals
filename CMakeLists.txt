@@ -41,6 +41,6 @@ add_subdirectory(src/utilities)
 #-------------------------------------------------------------------------------
 # Individual driver targets
 #-------------------------------------------------------------------------------
-add_subdirectory(src/image_viewer)
+# add_subdirectory(src/image_viewer)
 add_subdirectory(src/5pt_algo)
 add_subdirectory(src/7pt_algo)

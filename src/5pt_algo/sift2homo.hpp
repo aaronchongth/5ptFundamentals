@@ -18,10 +18,12 @@
 
 using namespace std;
 using namespace cv;
-using namespace Eigen;
 
 bool sift_to_homography(const Mat& points_1, const Mat& points_2,
-                        const Mat& angles, Mat homography);
+                        const Mat& angles, Mat& homography);
 
 bool homography_to_affine(const Mat& H, double x1, double y1, double x2,
                           double y2, Mat& A);
+
+bool decompose_affine(const Mat& A, double& sx, double& sy, double& alpha,
+                      double& w);
