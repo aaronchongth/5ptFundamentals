@@ -2,7 +2,7 @@
 project(5pt_algo C CXX)
 
 set(SOURCES
-    main.cpp
+    5pt.cpp
     ransac.cpp
     sift2homo.cpp
     homo2fund.cpp
