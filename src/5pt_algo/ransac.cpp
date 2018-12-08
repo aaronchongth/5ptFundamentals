@@ -1,7 +1,7 @@
 #include "ransac.hpp"
+#include "data_handler/data_handler.hpp"
 #include "homo2fund.hpp"
 #include "sift2homo.hpp"
-#include "data_handler/data_handler.hpp"
 #include "utilities/utilities.hpp"
 
 using namespace Eigen;
@@ -31,13 +31,10 @@ bool ransac(int iterations, double threshold, double confidence,
       angles.at<double>(i, 0) = keypoints_2[matches[index].trainIdx].angle -
                                 keypoints_1[matches[index].queryIdx].angle;
     }
-    // cout << points_1 << endl << points_2 << endl;
 
     // normalize
     Mat T_1, T_2;
     normalize(points_1, points_2, T_1, T_2);
-    // if (normalize(points_1, points_2, T_1, T_2)) cout << "Normalized." <<
-    // endl;
 
     // get homography
     Mat homography;
@@ -45,7 +42,6 @@ bool ransac(int iterations, double threshold, double confidence,
     if (sift_to_homography(Mat(points_1, roi), Mat(points_2, roi), angles,
                            homography)) {
       homography = T_2.inv() * homography * T_1;
-      // cout << "Found homography." << endl << homography << endl << endl;
     }
 
     // check the other correspondences
