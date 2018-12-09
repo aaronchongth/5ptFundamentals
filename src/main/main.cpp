@@ -8,19 +8,18 @@
 #include "opencv2/features2d.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgcodecs.hpp"
-#include "opencv2/xfeatures2d.hpp"
-#include "opencv2/calib3d.hpp"
 #include "opencv2/sfm.hpp"
-#include "utils.hpp"
+#include "opencv2/xfeatures2d.hpp"
 #include "utilities/utilities.hpp"
 #include "utils.hpp"
 using namespace cv;
 using namespace cv::xfeatures2d;
 
-void get_Rt_from_F(const std::vector<KeyPoint>& keypoints_1, const std::vector<KeyPoint>& keypoints_2,
-              const std::vector<DMatch>& good_matches, const Mat& K, const Mat& F, Mat& R, Mat& t)
-{
-  Mat E(3,3,CV_64F);
+void get_Rt_from_F(const std::vector<KeyPoint>& keypoints_1,
+                   const std::vector<KeyPoint>& keypoints_2,
+                   const std::vector<DMatch>& good_matches, const Mat& K,
+                   const Mat& F, Mat& R, Mat& t) {
+  Mat E(3, 3, CV_64F);
   sfm::essentialFromFundamental(F, K, K, E);
   std::vector<Mat> Rs, ts;
 
@@ -30,8 +29,8 @@ void get_Rt_from_F(const std::vector<KeyPoint>& keypoints_1, const std::vector<K
 
   double pt1_d[2] = {pt1.x, pt1.y};
   double pt2_d[2] = {pt2.x, pt2.y};
-  Mat pt1_m(2,1,CV_64F, pt1_d);
-  Mat pt2_m(2,1,CV_64F, pt2_d);
+  Mat pt1_m(2, 1, CV_64F, pt1_d);
+  Mat pt2_m(2, 1, CV_64F, pt2_d);
 
   sfm::motionFromEssential(E, Rs, ts);
   int sol = sfm::motionFromEssentialChooseSolution(Rs, ts, K, pt1_m, K, pt2_m);

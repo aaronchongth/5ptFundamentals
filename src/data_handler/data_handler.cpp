@@ -26,7 +26,7 @@ bool KITTIDataHandler::get_next_image(Mat& image) {
   string image_path = locateFile(image_name, directories_);
 
   // printing stuff
-  cout << '\r' << "Collecting: " << image_name << flush;
+  // cout << '\r' << "Collecting: " << image_name << flush;
 
   // read the image or loop around
   if (!image_path.empty()) {

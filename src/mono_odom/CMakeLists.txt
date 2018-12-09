@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-project(main C CXX)
+project(mono_odom C CXX)
 
 set(SOURCES
     main.cpp

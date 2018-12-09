@@ -46,7 +46,7 @@ bool ransac(int iterations, double threshold, double confidence,
     Rect roi(0, 0, points_1.cols, 3);
     if (!sift_to_homography(Mat(norm_points_1, roi), Mat(norm_points_2, roi),
                             angles, homography))
-      cout << "Sift to homography failed." << endl;
+      continue;
     homography = T_2.inv() * homography * T_1;
 
     // check the other correspondences

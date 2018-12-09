@@ -21,6 +21,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 #-------------------------------------------------------------------------------
 set(OpenCV_BUILD_DIR "${CMAKE_SOURCE_DIR}/deps/opencv/build")
 find_package(OpenCV 3.4.0 PATHS ${OpenCV_BUILD_DIR})
+find_package(gflags REQUIRED) # SFM requirements
 
 #-------------------------------------------------------------------------------
 # Eigen
@@ -37,11 +38,13 @@ set(cxxopts_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/3rd_party/cxxopts/include")
 #-------------------------------------------------------------------------------
 add_subdirectory(src/data_handler)
 add_subdirectory(src/utilities)
+add_subdirectory(src/5pt_algo)
+add_subdirectory(src/7pt_algo)
 
 #-------------------------------------------------------------------------------
 # Individual driver targets
 #-------------------------------------------------------------------------------
-# add_subdirectory(src/image_viewer)
-add_subdirectory(src/5pt_algo)
-add_subdirectory(src/7pt_algo)
+add_subdirectory(src/image_viewer)
+add_subdirectory(src/test_libs)
 add_subdirectory(src/main)
+add_subdirectory(src/mono_odom)

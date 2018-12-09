@@ -100,6 +100,31 @@ bool get_matched_images(Mat& img_1, std::vector<KeyPoint>& keypoints_1,
   return true;
 }
 
+bool match_images(const Mat& img_1, const Mat& img_2,
+                  std::vector<KeyPoint>& keypoints_1,
+                  std::vector<KeyPoint>& keypoints_2, Mat& descriptors_1,
+                  Mat& descriptors_2, std::vector<DMatch>& good_matches) {
+  // get the sets of SIFT and descriptors
+  int n_features = 1000;
+  Ptr<SIFT> detector = SIFT::create(n_features);
+  detector->detectAndCompute(img_1, Mat(), keypoints_1, descriptors_1);
+  detector->detectAndCompute(img_2, Mat(), keypoints_2, descriptors_2);
+
+  // matching using FLANN matcher
+  FlannBasedMatcher matcher;
+  std::vector<std::vector<DMatch> > matches;
+  matcher.knnMatch(descriptors_1, descriptors_2, matches, 2);
+
+  // get the good matches
+  float ratio = 0.5f;
+  for (int i = 0; i < descriptors_1.rows; i++) {
+    if (matches[i][0].distance < ratio * matches[i][1].distance) {
+      good_matches.push_back(matches[i][0]);
+    }
+  }
+  return true;
+}
+
 unsigned int num_inliers(const std::vector<KeyPoint>& keypoints_1,
                          const std::vector<KeyPoint>& keypoints_2, const Mat& F,
                          const std::vector<DMatch>& good_matches,
