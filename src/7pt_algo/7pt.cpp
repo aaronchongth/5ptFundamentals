@@ -142,10 +142,11 @@ std::vector<Mat> run7Point(Mat _m1, Mat _m2) {
 int get_7pt_F(Mat& img1, std::vector<KeyPoint>& keypoints_1, Mat& descriptors_1,
               Mat& img2, std::vector<KeyPoint>& keypoints_2, Mat& descriptors_2,
               std::vector<DMatch>& good_matches, Mat& fund) {
+  auto t0 = chrono::system_clock::now();
   // RANSAC to find best fundamental matrix
   srand(time(NULL));
   unsigned int n_matches = good_matches.size();
-  unsigned int its = 3000;
+  unsigned int its = 10;
   unsigned int n_inliers = 0;
   unsigned int best_inliers = 0;
   Mat best_F(3, 3, CV_64F);
@@ -188,6 +189,10 @@ int get_7pt_F(Mat& img1, std::vector<KeyPoint>& keypoints_1, Mat& descriptors_1,
   std::cout << "best F: " << best_F << std::endl;
   std::cout << best_inliers << " out of " << n_matches << std::endl;
   fund = best_F;
+  auto duration = chrono::duration_cast<chrono::milliseconds>(
+      chrono::system_clock::now() - t0);
+  int ms_passed = (int)duration.count();
+  cout << "Found F matrix in " << ms_passed << " milliseconds" << endl;
   return best_inliers;
 
   /*

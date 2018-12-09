@@ -19,7 +19,8 @@ bool ransac(int iterations, double threshold, double confidence,
   long max_iterations = LONG_MAX;
   unsigned int best_n_inliers = 0;
   Mat best_F(3, 3, CV_64F);
-  for (int iter = 0; iter < iterations; iter++) {
+  int iter = 0;
+  for (; iter < iterations; iter++) {
     // grab the points and angles in Mat
     Mat points_1(5, 2, CV_64F);
     Mat points_2(5, 2, CV_64F);
@@ -91,7 +92,7 @@ bool ransac(int iterations, double threshold, double confidence,
 
     // cut off when max iterations achieved
     if (iter > max_iterations) break;
-  }
+  }  // end for each iteration
   F = best_F;
   // cout << "best F: " << best_F << endl;
   // cout << best_n_inliers << " out of " << matches.size() << endl;
