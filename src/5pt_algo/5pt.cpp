@@ -15,7 +15,7 @@ void get_5pt_F(Mat& img_1, std::vector<KeyPoint>& keypoints_1,
   // parameters for GCRANSAC
   int iterations = 1000;
   float threshold = 0.1;
-  float confidence = 0.99;
+  float confidence = 0.999;
   Mat fundamental_matrix(3, 3, CV_64F);
   // start ransac loop
   if (ransac(iterations, threshold, confidence, good_matches, keypoints_1,
@@ -27,7 +27,7 @@ void get_5pt_F(Mat& img_1, std::vector<KeyPoint>& keypoints_1,
   auto duration = chrono::duration_cast<chrono::milliseconds>(
       chrono::system_clock::now() - t0);
   int ms_passed = (int)duration.count();
-  cout << "One iteration takes: " << ms_passed << " milliseconds" << endl;
+  cout << "Found F matrix in " << ms_passed << " milliseconds" << endl;
 
   fund = fundamental_matrix;
   cout << "All done." << endl;

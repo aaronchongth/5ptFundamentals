@@ -24,7 +24,7 @@ void get_Rt_from_F(const std::vector<KeyPoint>& keypoints_1, const std::vector<K
   sfm::essentialFromFundamental(F, K, K, E);
   std::vector<Mat> Rs, ts;
 
-  const DMatch* this_match = &good_matches[5];
+  const DMatch* this_match = &good_matches[10];
   Point2f pt1 = keypoints_1[this_match->queryIdx].pt;
   Point2f pt2 = keypoints_2[this_match->trainIdx].pt;
 
