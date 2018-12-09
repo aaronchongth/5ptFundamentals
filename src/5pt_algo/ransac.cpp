@@ -93,6 +93,7 @@ bool ransac(int iterations, double threshold, double confidence,
     if (iter > max_iterations) break;
   }
   F = best_F;
-  cout << "best F: " << best_F << endl;
-  cout << best_n_inliers << " out of " << matches.size() << endl;
+  // cout << "best F: " << best_F << endl;
+  // cout << best_n_inliers << " out of " << matches.size() << endl;
+  return true;
 }
