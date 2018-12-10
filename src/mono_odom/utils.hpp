@@ -23,6 +23,7 @@
 #include "5pt_algo/5pt.hpp"
 #include "7pt_algo/7pt.hpp"
 #include "data_handler/data_handler.hpp"
+#include "extra_data_handler/extra_data_handler.hpp"
 #include "utilities/utilities.hpp"
 
 inline void cry(std::string error_msg) {

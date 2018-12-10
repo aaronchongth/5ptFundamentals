@@ -19,8 +19,7 @@ bool ransac(int iterations, double threshold, double confidence,
   long max_iterations = LONG_MAX;
   unsigned int best_n_inliers = 0;
   Mat best_F(3, 3, CV_64F);
-  int iter = 0;
-  for (; iter < iterations; iter++) {
+  for (int iter = 0; iter < iterations; iter++) {
     // grab the points and angles in Mat
     Mat points_1(5, 2, CV_64F);
     Mat points_2(5, 2, CV_64F);
@@ -63,7 +62,7 @@ bool ransac(int iterations, double threshold, double confidence,
 
       Mat proj_1 = homography * pt_1;
       proj_1 = proj_1 / proj_1.at<double>(2, 0);
-      if (norm(proj_1 - pt_2) < threshold) {
+      if (norm(proj_1 - pt_2) < 3.0) {
         points_too_close = true;
         break;
       }
@@ -72,23 +71,27 @@ bool ransac(int iterations, double threshold, double confidence,
 
     // get fundamental matrix
     Mat fundamental_matrix;
-    if (!homography_to_fundamental(homography, points_1, points_2, img_width,
-                                   img_height, fundamental_matrix))
-      cout << "Fundamental matrix estimation failed." << endl;
+    // if (!homography_to_fundamental(homography, points_1, points_2, img_width,
+    //                                img_height, fundamental_matrix))
+    //   cout << "Fundamental matrix estimation failed." << endl;
+    vector<Mat> sols =
+        homography_to_fundamental(homography, points_1, points_2, img_width,
+                                  img_height, fundamental_matrix);
 
-    // collect inliers, by estimating symmetric epipolar distance
-    // for each correspondences, estimate epipolar distance
-    unsigned int n_inliers = num_inliers(
-        keypoints_1, keypoints_2, fundamental_matrix, matches, threshold);
-    if (n_inliers > best_n_inliers) {
-      best_n_inliers = n_inliers;
-      best_F = fundamental_matrix.clone();
-    }
+    // for each solution, try it out
+    for (int i = 0; i < sols.size(); i++) {
+      Mat F = sols[i];
+      unsigned int n_inliers =
+          num_inliers(keypoints_1, keypoints_2, F, matches, threshold);
 
-    // update inliers, max iterations
-    max_iterations =
-        log(1 - confidence) /
-        log(1 - pow((double)best_n_inliers / (double)matches.size(), 5.0));
+      if (n_inliers > best_n_inliers) {
+        best_n_inliers = n_inliers;
+        best_F = F.clone();
+        max_iterations =
+            log(1 - confidence) /
+            log(1 - pow((double)best_n_inliers / (double)matches.size(), 5.0));
+      }
+    }  // end for each solutions
 
     // cut off when max iterations achieved
     if (iter > max_iterations) break;

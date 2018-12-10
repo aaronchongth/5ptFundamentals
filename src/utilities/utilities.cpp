@@ -279,3 +279,120 @@ bool plot_testing(const Mat& img_1, const Mat& img_2,
   imshow("Good Matches", img_matches);
   waitKey(0);
 }
+
+std::vector<Mat> run7Point(Mat _m1, Mat _m2) {
+  double a[7 * 9], w[7], u[9 * 9], v[9 * 9], c[4], r[3] = {0};
+  double *f1, *f2;
+  double t0, t1, t2;
+  Mat A(7, 9, CV_64F, a);
+  Mat U(7, 9, CV_64F, u);
+  Mat Vt(9, 9, CV_64F, v);
+  Mat W(7, 1, CV_64F, w);
+  Mat coeffs(1, 4, CV_64F, c);
+  Mat roots(1, 3, CV_64F, r);
+  Mat T1 = Mat::eye(3, 3, CV_64F);
+  Mat T2 = Mat::eye(3, 3, CV_64F);
+  std::vector<Mat> ret = std::vector<Mat>();
+  int i, k, n;
+
+  normalize(_m1, _m2, T1, T2);
+
+  // form a linear system: i-th row of A(=a) represents
+  // the equation: (m2[i], 1)'*F*(m1[i], 1) = 0
+  for (i = 0; i < 7; i++) {
+    double x0 = _m1.at<double>(i, 0), y0 = _m1.at<double>(i, 1);
+    double x1 = _m2.at<double>(i, 0), y1 = _m2.at<double>(i, 1);
+
+    a[i * 9 + 0] = x1 * x0;
+    a[i * 9 + 1] = x1 * y0;
+    a[i * 9 + 2] = x1;
+    a[i * 9 + 3] = y1 * x0;
+    a[i * 9 + 4] = y1 * y0;
+    a[i * 9 + 5] = y1;
+    a[i * 9 + 6] = x0;
+    a[i * 9 + 7] = y0;
+    a[i * 9 + 8] = 1;
+  }
+
+  // A*(f11 f12 ... f33)' = 0 is singular (7 equations for 9 variables), so
+  // the solution is linear subspace of dimensionality 2.
+  // => use the last two singular vectors as a basis of the space
+  // (according to SVD properties)
+  SVDecomp(A, W, U, Vt, SVD::MODIFY_A + SVD::FULL_UV);
+  f1 = v + 7 * 9;
+  f2 = v + 8 * 9;
+
+  // f1, f2 is a basis => lambda*f1 + mu*f2 is an arbitrary fundamental matrix,
+  // as it is determined up to a scale, normalize lambda & mu (lambda + mu = 1),
+  // so f ~ lambda*f1 + (1 - lambda)*f2.
+  // use the additional constraint det(f) = det(lambda*f1 + (1-lambda)*f2) to
+  // find lambda. it will be a cubic equation. find c - polynomial coefficients.
+  for (i = 0; i < 9; i++) f1[i] -= f2[i];
+
+  t0 = f2[4] * f2[8] - f2[5] * f2[7];
+  t1 = f2[3] * f2[8] - f2[5] * f2[6];
+  t2 = f2[3] * f2[7] - f2[4] * f2[6];
+
+  c[3] = f2[0] * t0 - f2[1] * t1 + f2[2] * t2;
+
+  c[2] = f1[0] * t0 - f1[1] * t1 + f1[2] * t2 -
+         f1[3] * (f2[1] * f2[8] - f2[2] * f2[7]) +
+         f1[4] * (f2[0] * f2[8] - f2[2] * f2[6]) -
+         f1[5] * (f2[0] * f2[7] - f2[1] * f2[6]) +
+         f1[6] * (f2[1] * f2[5] - f2[2] * f2[4]) -
+         f1[7] * (f2[0] * f2[5] - f2[2] * f2[3]) +
+         f1[8] * (f2[0] * f2[4] - f2[1] * f2[3]);
+
+  t0 = f1[4] * f1[8] - f1[5] * f1[7];
+  t1 = f1[3] * f1[8] - f1[5] * f1[6];
+  t2 = f1[3] * f1[7] - f1[4] * f1[6];
+
+  c[1] = f2[0] * t0 - f2[1] * t1 + f2[2] * t2 -
+         f2[3] * (f1[1] * f1[8] - f1[2] * f1[7]) +
+         f2[4] * (f1[0] * f1[8] - f1[2] * f1[6]) -
+         f2[5] * (f1[0] * f1[7] - f1[1] * f1[6]) +
+         f2[6] * (f1[1] * f1[5] - f1[2] * f1[4]) -
+         f2[7] * (f1[0] * f1[5] - f1[2] * f1[3]) +
+         f2[8] * (f1[0] * f1[4] - f1[1] * f1[3]);
+
+  c[0] = f1[0] * t0 - f1[1] * t1 + f1[2] * t2;
+
+  // solve the cubic equation; there can be 1 to 3 roots ...
+  n = solveCubic(coeffs, roots);
+
+  if (n < 1 || n > 3) return ret;
+
+  for (k = 0; k < n; k++) {
+    double data[9];
+
+    // for each root form the fundamental matrix
+    double lambda = r[k], mu = 1.;
+    double s = f1[8] * r[k] + f2[8];
+
+    // normalize each matrix, so that F(3,3) (~data[8]) == 1
+    if (fabs(s) > DBL_EPSILON) {
+      mu = 1. / s;
+      lambda *= mu;
+      data[8] = 1.;
+    } else
+      data[8] = 0.;
+
+    for (i = 0; i < 8; i++) data[i] = f1[i] * lambda + f2[i] * mu;
+
+    Mat tmp(3, 3, CV_64F, data);
+    Mat tmp2 = (T2.t() * tmp) * T1;
+    ret.push_back(tmp2 / tmp2.at<double>(2, 2));
+
+    /* test of x'^T * F * x = 0
+    for (int i = 0; i < 7; i++)
+    {
+      double p1d[3] = {_m1.at<double>(i, 0), _m1.at<double>(i, 1), 1};
+      double p2d[3] = {_m2.at<double>(i, 0), _m2.at<double>(i, 1), 1};
+      Mat p1(3,1,CV_64F,p1d), p2(3,1,CV_64F,p2d);
+      std::cout << "test: " << p2.t() * tmp * p1 << std::endl;
+    }
+    */
+  }
+
+  return ret;
+}

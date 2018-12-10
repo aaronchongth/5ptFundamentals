@@ -27,11 +27,8 @@ void get_Rt_from_F(const std::vector<KeyPoint>& keypoints_1,
 }
 
 int main() {
-  // static dataConfig data_config;
-  // static KITTIDataHandler data_handler(data_config);
-  static extra_dataConfig data_config;
-  data_config.data_path = "data/deps/dataset/sequences/05/image_0/";
-  static extra_KITTIDataHandler data_handler(data_config);
+  static dataConfig data_config;
+  static KITTIDataHandler data_handler(data_config);
   Mat img_1, img_2;
 
   // get the starting frame
@@ -44,11 +41,11 @@ int main() {
 
   // initialize the file to be written in
   ofstream myfile;
-  myfile.open("5pt_05.txt");
+  myfile.open("7pt.txt");
   myfile << "0 0 0" << endl;
 
   // start looping, currently hard coding to loop through all images
-  int n_frames = 200;
+  int n_frames = 83;
   int total_ms = 0;
   for (int i = 0; i < n_frames; i++) {
     // get the next frame
@@ -64,11 +61,11 @@ int main() {
 
     // do the algorithm
     Mat F;
-    total_ms += get_5pt_F(img_1, keypoints_1, descriptors_1, img_2, keypoints_2,
-                          descriptors_2, good_matches, F);
-    // total_ms += get_7pt_F(img_1, keypoints_1, descriptors_1, img_2,
+    // total_ms += get_5pt_F(img_1, keypoints_1, descriptors_1, img_2,
     // keypoints_2,
     //                       descriptors_2, good_matches, F);
+    total_iterations += get_7pt_F(img_1, keypoints_1, descriptors_1, img_2,
+                                  keypoints_2, descriptors_2, good_matches, F);
 
     // getting R and t
     double K_data[9] = {984.2439, 0, 690, 0, 980.8141, 233.1966, 0, 0, 1};

@@ -16,11 +16,13 @@
 // Eigen
 #include "Eigen/Dense"
 
+#include "utilities/utilities.hpp"
+
 using namespace std;
 using namespace cv;
 
 bool check_F_signs(const Mat& f, const Mat& x1, const Mat& x2);
 
-bool homography_to_fundamental(const Mat& H, const Mat& points_1,
-                               const Mat& points_2, int img_width,
-                               int img_height, Mat& F);
+std::vector<Mat> homography_to_fundamental(const Mat& H, const Mat& points_1,
+                                           const Mat& points_2, int img_width,
+                                           int img_height, Mat& F);

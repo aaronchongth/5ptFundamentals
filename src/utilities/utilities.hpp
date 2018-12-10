@@ -34,3 +34,5 @@ bool plot_testing(const Mat& img_1, const Mat& img_2,
                   const std::vector<KeyPoint>& keypoints_2,
                   std::vector<DMatch>& good_matches, const Mat& F,
                   float threshold);
+
+std::vector<Mat> run7Point(Mat _m1, Mat _m2);

@@ -1,8 +1,8 @@
 #-------------------------------------------------------------------------------
-project(mono_odom C CXX)
+project(extra_data_handler C CXX)
 
 set(SOURCES
-    main.cpp
+    extra_data_handler.cpp
 )
 
 set(PRIVATE_LIBRARIES
@@ -20,18 +20,14 @@ set(PRIVATE_INCLUDES ${eigen_INCLUDE_DIRS} ${PRIVATE_INCLUDES})
 #-------------------------------------------------------------------------------
 set(PRIVATE_LIBRARIES ${OpenCV_LIBS} ${PRIVATE_LIBRARIES})
 set(PRIVATE_LIBRARIES utilities ${PRIVATE_LIBRARIES})
-set(PRIVATE_LIBRARIES 7pt_algo ${PRIVATE_LIBRARIES})
-set(PRIVATE_LIBRARIES 5pt_algo ${PRIVATE_LIBRARIES})
-set(PRIVATE_LIBRARIES extra_data_handler ${PRIVATE_LIBRARIES})
 
 #-------------------------------------------------------------------------------
-# Final target
+# Final library target
 #-------------------------------------------------------------------------------
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE
                       ${PRIVATE_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
                            PRIVATE
                            ${PRIVATE_INCLUDES})
-

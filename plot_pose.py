@@ -12,16 +12,16 @@ if __name__ == "__main__":
 
     # prepare to plot in 3D
     fig = plt.figure()
-    ax = fig.add_subplot(211, projection='3d')
-    a2d = fig.add_subplot(212)
+    # ax = fig.add_subplot(211, projection='3d')
+    a2d = fig.add_subplot(111)
 
     file = open(args.text_file, 'r')
     for line in file:
         x, y, z = line.split(' ')
-        ax.scatter(float(x), float(y), float(z), c='r', marker='.')
-        a2d.plot(float(x), float(z), c='r', marker='.')
+        # ax.scatter(float(x), float(y), float(z), c='r', marker='.')
+        a2d.plot(float(x), -float(z), c='r', marker='.')
 
-    ax.set_xlabel('Frame left')
-    ax.set_ylabel('Frame upwards')
-    ax.set_zlabel('Frame forwards')
+    # ax.set_xlabel('Frame left')
+    # ax.set_ylabel('Frame upwards')
+    # ax.set_zlabel('Frame forwards')
     plt.show()

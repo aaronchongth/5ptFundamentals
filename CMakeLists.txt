@@ -40,11 +40,12 @@ add_subdirectory(src/data_handler)
 add_subdirectory(src/utilities)
 add_subdirectory(src/5pt_algo)
 add_subdirectory(src/7pt_algo)
+add_subdirectory(src/extra_data_handler)
 
 #-------------------------------------------------------------------------------
 # Individual driver targets
 #-------------------------------------------------------------------------------
 add_subdirectory(src/image_viewer)
-add_subdirectory(src/test_libs)
+# add_subdirectory(src/test_libs)
 add_subdirectory(src/main)
 add_subdirectory(src/mono_odom)

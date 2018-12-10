@@ -3,32 +3,36 @@
 
 using namespace std;
 
-bool homography_to_fundamental(const Mat& H, const Mat& points_1,
-                               const Mat& points_2, int img_width,
-                               int img_height, Mat& F) {
+std::vector<Mat> homography_to_fundamental(const Mat& H, const Mat& points_1,
+                                           const Mat& points_2, int img_width,
+                                           int img_height, Mat& F) {
   // hallucinate 5 correspondences on the image
-  vector<double> hallucinated_pts = {0,
-                                     0,
-                                     1,
-                                     (double)img_width,
-                                     0,
-                                     1,
-                                     0,
-                                     (double)img_height,
-                                     1,
-                                     (double)img_width,
-                                     (double)img_height,
-                                     1,
-                                     (double)img_width / 2,
-                                     (double)img_height / 2,
-                                     1};
+  // vector<double> hallucinated_pts = {0,
+  //                                    0,
+  //                                    1,
+  //                                    (double)img_width,
+  //                                    0,
+  //                                    1,
+  //                                    0,
+  //                                    (double)img_height,
+  //                                    1,
+  //                                    (double)img_width,
+  //                                    (double)img_height,
+  //                                    1,
+  //                                    (double)img_width / 2,
+  //                                    (double)img_height / 2,
+  //                                    1};
+  vector<double> hallucinated_pts = {
+      0, 0, 1, (double)img_width, (double)img_height, 1};
   Mat hallu_pts_1(hallucinated_pts);
-  hallu_pts_1 = hallu_pts_1.reshape(1, 5);
+  // hallu_pts_1 = hallu_pts_1.reshape(1, 5);
+  hallu_pts_1 = hallu_pts_1.reshape(1, 2);
   hallu_pts_1 = hallu_pts_1.t();
   Mat hallu_pts_2 = H * hallu_pts_1;
 
   // normalize everything in hallu pts 2
-  for (int i = 0; i < 5; i++)
+  // for (int i = 0; i < 5; i++)
+  for (int i = 0; i < 2; i++)
     hallu_pts_2.col(i) /= hallu_pts_2.at<double>(2, i);
 
   // put the points together, they should all be in image pixels
@@ -47,9 +51,18 @@ bool homography_to_fundamental(const Mat& H, const Mat& points_1,
   Mat all_points_1, all_points_2;
   hconcat(hallu_pts_1, homo_points_1.t(), all_points_1);
   hconcat(hallu_pts_2, homo_points_2.t(), all_points_2);
+  Rect only_xy_crop = Rect(0, 0, 7, 2);
+
+  Mat p_1 = all_points_1(only_xy_crop);
+  Mat p_2 = all_points_2(only_xy_crop);
+  p_1 = p_1.t();
+  p_2 = p_2.t();
 
   // solve using DLT, Af = 0
-  return overconstrained_DLT(all_points_1, all_points_2, F);
+  // return overconstrained_DLT(all_points_1, all_points_2, F);
+
+  // solve using 7pt algorithm
+  return run7Point(p_1.clone(), p_2.clone());
 }
 
 bool check_F_signs(const Mat& F, const Mat& points_1, const Mat& points_2) {
